@@ -44,7 +44,7 @@ Extra Credit - Potential Risks:
 - Safety and Liability Concerns:
    Due to the fact that our application facilitates real-world events and gatherings naturally this could lead to unsafe scenarios such as overcrowding or harassment, the consequences of which could be blamed on our platform. This is a high severity risk since it could lead to a lack of trust in our platform as well as even possible legal action. This could be mitigates by implementing clear terms of service for our platform as well as liability disclaimers. We could also implement general safety guidelines for all events hosted on our platform.
 
-- Misuse of our platform for harassment, spam, or fake events: 
+- Misuse of our Platform for Harassment, Spam, or Fake Events: 
     Since our platform is inherently social there is a risk of people using it to harass others or host fake events. This risk has a medium to high severity due to the direct impact that the possibility of harassment would have on our users. This could be mitigated through implementing blocking and reporting features as well as having either manual or automated moderation on events and chats hosted on our platform. 
 
 - Scalability and Performance issues:
