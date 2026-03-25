@@ -10,6 +10,7 @@
  Dawson Ash - dawsonash - daas8540@colorado.edu 
  Sawyer Basch - sawhutch123 - saba6053@colorado.edu
  Abrham Gebremeskel - abrhamgm - abge3546@colorado.edu
+ Ayub Ahmed - ayubahmed1 - ayah7240@colorado.edu
 
 4. Application Name: CU Function Finder (CUFF)
 
