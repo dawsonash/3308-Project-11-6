@@ -38,6 +38,26 @@ app.post('/create-checkout-session', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+module.exports = app.listen(3000);
+
+const bcrypt = require('bcrypt');
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password || typeof username !== 'string') {
+    return res.status(400).json({ message: 'Invalid input' });
+  }
+
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const query = 'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *;';
+    
+    await db.one(query, [username, hash]);
+    
+    res.status(200).json({ message: 'Success' });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: 'Invalid input' });
+  }
 });
