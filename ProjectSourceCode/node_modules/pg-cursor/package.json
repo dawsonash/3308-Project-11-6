@@ -1,0 +1,38 @@
+{
+  "name": "pg-cursor",
+  "version": "2.19.0",
+  "description": "Query cursor extension for node-postgres",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./esm/index.mjs",
+      "require": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brianc/node-postgres.git",
+    "directory": "packages/pg-cursor"
+  },
+  "author": "Brian M. Carlson",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^11.7.5",
+    "pg": "^8.20.0"
+  },
+  "peerDependencies": {
+    "pg": "^8"
+  },
+  "files": [
+    "index.js",
+    "esm"
+  ],
+  "gitHead": "c9070cc8d526fca65780cedc25c1966b57cf7532"
+}

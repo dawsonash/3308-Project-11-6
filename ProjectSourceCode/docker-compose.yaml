@@ -1,27 +1,27 @@
 services:
   db:
-    image: postgres:15-alpine
-    container_name: cuff_db
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=cuff_db
-    ports:
-      - "5432:5432"
+    image: postgres
+    env_file: .env
+    expose:
+      - '5432'
     volumes:
+      - group-project:/var/lib/postgresql
       - ./src/init_data:/docker-entrypoint-initdb.d
 
   web:
-    build: .
-    container_name: cuff_web
-    restart: always
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-      - /app/node_modules
+    image: node:lts
+    user: 'node'
+    working_dir: /repository
+    env_file: .env
+    environment:
+      - NODE_ENV=development
     depends_on:
       - db
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./:/repository
+    command: 'npm start'
+
+volumes:
+  group-project:
