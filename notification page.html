@@ -1,529 +1,421 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CUFF – Notifications</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CUFF – Notifications</title>
 
-:root {
-  --cu-gold: #CFB87C;
-  --cu-gold-light: #F5EDCC;
-  --cu-gold-dark: #8A7340;
-  --cu-black: #1A1A1A;
-  --cu-surface: #FAFAF8;
-  --cu-card: #FFFFFF;
-  --cu-border: rgba(0,0,0,0.08);
-  --cu-border-strong: rgba(0,0,0,0.14);
-  --cu-text: #1A1A1A;
-  --cu-text-muted: #6B6B6B;
-  --cu-text-hint: #9A9A9A;
-  --unread-bg: #FFFDF0;
-  --radius: 14px;
-  --radius-sm: 8px;
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-}
+  <!-- viewport scales the page according to the device-width
+  fonts, and icons imported from cluade -->
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
 
-body {
-  font-family: var(--font-body);
-  background: var(--cu-surface);
-  color: var(--cu-text);
-  min-height: 100vh;
-  line-height: 1.5;
-}
+  <!-- color based on wire frame -->
+  <style>
+    :root {
+      --cuff-navy:       #1C2B3A;
+      --cuff-navy-light: #2E3F50;
+      --cuff-accent:     #2E3F50;
+      --cuff-black:      #1A1A1A;
+      --cuff-surface:    #F4F5F7;
+      --cuff-white:      #FFFFFF;
+      --cuff-border:     #D0D4DA;
+      --cuff-text:       #1A1A1A;
+      --cuff-muted:      #6B7280;
+      --unread-bg:     #EEF2F7;
+      --unread-accent: #1C2B3A;
+    }
 
-/* NAV */
-.top-nav {
-  background: var(--cu-black);
-  padding: 0 1.5rem;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px; position: sticky; top: 0; z-index: 200;
-}
-.nav-logo {
-  font-family: var(--font-display);
-  font-weight: 700; font-size: 20px;
-  color: var(--cu-gold); letter-spacing: -0.5px; cursor: pointer;
-}
-.nav-logo span { color: #fff; opacity: 0.5; font-weight: 400; }
-.nav-links { display: flex; align-items: center; gap: 4px; }
-.nav-links a {
-  font-size: 14px; font-weight: 500;
-  color: rgba(255,255,255,0.55);
-  text-decoration: none; padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  transition: color 0.15s, background 0.15s; cursor: pointer;
-}
-.nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
-.nav-links a.active { color: var(--cu-gold); }
-.nav-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--cu-gold);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-size: 13px; font-weight: 600;
-  color: var(--cu-black); cursor: pointer;
-}
+    body { background: var(--cuff-surface); font-family: 'DM Sans', sans-serif; color: var(--cuff-text); }
 
-/* VIEWS */
-.view { display: none; max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
-.view.active { display: block; }
+    /* ── navbar ── */
+    .navbar { background: var(--cuff-navy) !important; min-height: 56px; }
+    .navbar-brand {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem;
+      color: #fff !important; letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .navbar-brand span { color: rgba(255,255,255,.5); font-weight: 400; }
+    .nav-link { color: rgba(255,255,255,.6) !important; font-size: .875rem; font-weight: 500; }
+    .nav-link:hover { color: #fff !important; }
+    .nav-link.active {
+      color: #fff !important;
+      background: rgba(255,255,255,.12);
+      border-radius: 4px;
+    }
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 4px;
+      background: rgba(255,255,255,.15); color: #fff;
+      border: 1px solid rgba(255,255,255,.25);
+      font-family: 'Syne', sans-serif; font-size: .8rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
 
-/* PAGE HEADER */
-.page-header {
-  display: flex; align-items: flex-end;
-  justify-content: space-between; margin-bottom: 1.5rem;
-  flex-wrap: wrap; gap: 12px;
-}
-.page-title {
-  font-family: var(--font-display);
-  font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
-}
-.unread-badge {
-  display: inline-flex; align-items: center;
-  background: var(--cu-gold); color: var(--cu-black);
-  font-family: var(--font-display); font-size: 12px; font-weight: 600;
-  padding: 3px 9px; border-radius: 20px;
-  margin-left: 10px; vertical-align: middle; position: relative; top: -3px;
-}
-.header-actions { display: flex; gap: 8px; }
-.btn-ghost {
-  font-size: 13px; font-weight: 500; color: var(--cu-text-muted);
-  background: none; border: 1px solid var(--cu-border-strong);
-  border-radius: var(--radius-sm); padding: 6px 14px;
-  cursor: pointer; transition: all 0.15s;
-}
-.btn-ghost:hover { background: var(--cu-card); color: var(--cu-text); }
+    /* ── VIEWS ── */
+    .view { display: none; }
+    .view.active { display: block; }
 
-/* DEMO BAR */
-.demo-bar {
-  background: var(--cu-card);
-  border: 1px dashed rgba(207,184,124,0.55);
-  border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
-}
-.demo-bar-title {
-  font-size: 11px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--cu-text-hint); margin-bottom: 10px;
-}
-.demo-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-.demo-btn {
-  font-family: var(--font-body); font-size: 12px; font-weight: 500;
-  padding: 6px 14px; border-radius: 20px;
-  border: 1px solid var(--cu-border-strong);
-  cursor: pointer; background: var(--cu-surface);
-  color: var(--cu-text-muted); transition: all 0.15s;
-}
-.demo-btn:hover { background: var(--cu-gold-light); color: var(--cu-gold-dark); border-color: var(--cu-gold); }
+    /* ── PAGE TITLE ── */
+    .page-title {
+      font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .04em; color: var(--cuff-text);
+    }
+    .unread-pill {
+      background: var(--cuff-navy); color: #fff;
+      font-family: 'Syne', sans-serif; font-size: .7rem; font-weight: 700;
+      padding: 2px 9px; border-radius: 4px;
+      vertical-align: middle; position: relative; top: -2px; margin-left: 8px;
+    }
 
-/* FILTER TABS */
-.filter-tabs {
-  display: flex; gap: 6px; margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--cu-border); overflow-x: auto;
-}
-.tab {
-  font-size: 14px; font-weight: 500; color: var(--cu-text-muted);
-  background: none; border: none; padding: 10px 14px; cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: all 0.15s; white-space: nowrap;
-}
-.tab:hover { color: var(--cu-text); }
-.tab.active { color: var(--cu-black); border-bottom-color: var(--cu-gold); }
+    /* ── DEMO BAR ── */
+    .demo-bar {
+      border: 1px dashed var(--cuff-border);
+      border-radius: .5rem; background: var(--cuff-white);
+    }
+    .demo-label {
+      font-size: .65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--cuff-muted);
+    }
+    .demo-btn {
+      font-size: .75rem; border-radius: 4px;
+      border: 1px solid var(--cuff-border); color: var(--cuff-muted);
+      background: var(--cuff-surface); transition: all .15s;
+    }
+    .demo-btn:hover {
+      background: var(--cuff-navy); color: #fff; border-color: var(--cuff-navy);
+    }
 
-/* NOTIFICATION CARDS */
-#notif-feed { display: flex; flex-direction: column; gap: 6px; }
+    /* ── FILTER TABS ── */
+    .filter-nav { border-bottom: 2px solid var(--cuff-border); flex-wrap: nowrap; overflow-x: auto; }
+    .filter-nav .nav-link {
+      color: var(--cuff-muted) !important; font-size: .875rem; font-weight: 500;
+      border: none; border-bottom: 2px solid transparent;
+      padding: .6rem .9rem; white-space: nowrap; border-radius: 0;
+      margin-bottom: -2px;
+    }
+    .filter-nav .nav-link:hover { color: var(--cuff-text) !important; }
+    .filter-nav .nav-link.active {
+      color: var(--cuff-navy) !important; font-weight: 600;
+      border-bottom-color: var(--cuff-navy); background: transparent;
+    }
 
-.notif-card {
-  background: var(--cu-card); border: 1px solid var(--cu-border);
-  border-radius: var(--radius); padding: 1rem 1.1rem;
-  display: flex; align-items: flex-start; gap: 14px;
-  cursor: pointer; transition: background 0.15s, transform 0.1s, border-color 0.15s;
-  position: relative; overflow: hidden;
-  animation: slideIn 0.28s ease both;
-}
-.notif-card:hover { background: #FEFEFE; border-color: var(--cu-border-strong); transform: translateY(-1px); }
-.notif-card.unread { background: var(--unread-bg); border-color: rgba(207,184,124,0.3); }
-.notif-card.unread::before {
-  content: ''; position: absolute;
-  left: 0; top: 0; bottom: 0; width: 3px;
-  background: var(--cu-gold); border-radius: 3px 0 0 3px;
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+    /* ── NOTIFICATION CARD ── */
+    .notif-card {
+      background: var(--cuff-white); border: 1px solid var(--cuff-border);
+      border-radius: .5rem; cursor: pointer;
+      transition: transform .1s, border-color .15s, box-shadow .15s;
+      position: relative; overflow: hidden;
+      animation: slideIn .25s ease both;
+    }
+    .notif-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .notif-card.unread { background: var(--unread-bg); border-color: #b0bec5; }
+    .notif-card.unread::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--cuff-navy); border-radius: 0;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-.notif-icon {
-  width: 40px; height: 40px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0; margin-top: 2px;
-}
-.icon-rsvp   { background: #EDFAF4; }
-.icon-friend { background: #FDF0F8; }
-.icon-invite { background: #EEF4FF; }
-.icon-remind { background: #FFF8EC; }
-.icon-event  { background: #F3EDFF; }
+    /* icon bubbles */
+    .notif-icon {
+      width: 42px; height: 42px; border-radius: 4px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .icon-rsvp   { background: #E8F5E9; }
+    .icon-friend { background: #EDE7F6; }
+    .icon-invite { background: #E3F2FD; }
+    .icon-remind { background: #FFF8E1; }
+    .icon-event  { background: #ECEFF1; }
 
-.notif-body { flex: 1; min-width: 0; }
-.notif-header {
-  display: flex; align-items: baseline;
-  justify-content: space-between; gap: 8px; margin-bottom: 3px;
-}
-.notif-title {
-  font-size: 14px; font-weight: 500; color: var(--cu-text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.notif-card.unread .notif-title { font-weight: 600; }
-.notif-time { font-size: 12px; color: var(--cu-text-hint); white-space: nowrap; flex-shrink: 0; }
-.notif-desc { font-size: 13px; color: var(--cu-text-muted); line-height: 1.45; margin-bottom: 8px; }
-.notif-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .notif-title { font-size: .875rem; font-weight: 500; color: #1a1a1a; }
+    .notif-card.unread .notif-title { font-weight: 600; }
+    .notif-time  { font-size: .72rem; color: #aaa; white-space: nowrap; }
+    .notif-desc  { font-size: .8rem; color: #666; line-height: 1.45; }
 
-.notif-tag {
-  font-size: 11px; font-weight: 500;
-  padding: 3px 9px; border-radius: 20px; border: 1px solid transparent;
-}
-.tag-rsvp   { background: #EDFAF4; color: #1A7A50; border-color: #A8E8CA; }
-.tag-friend { background: #FDF0F8; color: #8A2060; border-color: #F0B0D8; }
-.tag-invite { background: #EEF4FF; color: #2A58B5; border-color: #BDD0F8; }
-.tag-remind { background: #FFF8EC; color: #8A5A0A; border-color: #F5D98A; }
-.tag-event  { background: #F3EDFF; color: #5C30A8; border-color: #C9B0F0; }
+    /* tags */
+    .notif-tag { font-size: .68rem; font-weight: 500; padding: 2px 9px; border-radius: 20px; border: 1px solid transparent; }
+    .tag-rsvp   { background: #EDFAF4; color: #1A7A50; border-color: #A8E8CA; }
+    .tag-friend { background: #FDF0F8; color: #8A2060; border-color: #F0B0D8; }
+    .tag-invite { background: #EEF4FF; color: #2A58B5; border-color: #BDD0F8; }
+    .tag-remind { background: #FFF8EC; color: #8A5A0A; border-color: #F5D98A; }
+    .tag-event  { background: #F3EDFF; color: #5C30A8; border-color: #C9B0F0; }
 
-.unread-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--cu-gold); flex-shrink: 0; margin-top: 8px;
-}
+    .unread-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--cuff-navy); flex-shrink: 0; margin-top: 6px;
+    }
 
-.empty-state {
-  text-align: center; padding: 3rem 1rem;
-  color: var(--cu-text-hint); font-size: 14px;
-}
-.empty-icon { font-size: 36px; margin-bottom: 1rem; }
+    /* ── DESTINATION VIEWS ── */
+    .event-badge {
+      width: 56px; height: 56px; border-radius: 6px; font-size: 1.6rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: #ECEFF1;
+    }
+    .avatar-big {
+      width: 80px; height: 80px; border-radius: 6px;
+      background: var(--cuff-navy); color: #fff;
+      font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto;
+    }
+    .btn-gold {
+      background: var(--cuff-navy); color: #fff;
+      border: none; font-weight: 600; width: 100%;
+      border-radius: 4px; padding: .65rem;
+    }
+    .btn-gold:hover { background: var(--cuff-navy-light); color: #fff; }
+    .btn-gold:disabled { background: #E8F5E9; color: #2E7D32; }
+    .btn-accept {
+      background: var(--cuff-navy); color: #fff;
+      border: none; font-weight: 600; border-radius: 4px; padding: .5rem 1.5rem;
+    }
+    .btn-accept:hover { background: var(--cuff-navy-light); }
+    .btn-accept:disabled { background: #E8F5E9; color: #2E7D32; }
 
-/* SETTINGS */
-.settings-bar {
-  margin-top: 2.5rem; background: var(--cu-card);
-  border: 1px solid var(--cu-border); border-radius: var(--radius); overflow: hidden;
-}
-.settings-bar-header {
-  padding: 1rem 1.25rem 0.75rem;
-  border-bottom: 1px solid var(--cu-border);
-  font-family: var(--font-display); font-size: 14px; font-weight: 600;
-}
-.settings-row {
-  display: flex; align-items: center;
-  justify-content: space-between; padding: 0.9rem 1.25rem;
-  border-bottom: 1px solid var(--cu-border);
-}
-.settings-row:last-child { border-bottom: none; }
-.settings-label { font-size: 14px; font-weight: 500; }
-.settings-sublabel { font-size: 12px; color: var(--cu-text-hint); margin-top: 2px; }
-.toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider {
-  position: absolute; cursor: pointer; inset: 0;
-  background: #D8D8D8; border-radius: 22px; transition: background 0.2s;
-}
-.toggle-slider::before {
-  content: ''; position: absolute;
-  width: 16px; height: 16px; left: 3px; top: 3px;
-  background: #fff; border-radius: 50%;
-  transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-}
-.toggle input:checked + .toggle-slider { background: var(--cu-gold); }
-.toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+    /* ── TOAST ── */
+    #toast-container { position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%); z-index: 9999; }
+    .cuff-toast {
+      background: var(--cuff-navy); color: #fff; border-radius: 4px;
+      padding: .5rem 1.25rem; font-size: .8rem; font-weight: 500;
+      border: 1px solid rgba(255,255,255,.15);
+      opacity: 0; transition: opacity .25s;
+      white-space: nowrap;
+    }
+    .cuff-toast.show { opacity: 1; }
 
-/* DESTINATION VIEWS */
-.view-header { display: flex; align-items: center; gap: 14px; margin-bottom: 1.5rem; }
-.back-btn {
-  font-size: 13px; font-weight: 500; color: var(--cu-text-muted);
-  background: none; border: 1px solid var(--cu-border-strong);
-  border-radius: var(--radius-sm); padding: 6px 14px;
-  cursor: pointer; transition: all 0.15s;
-}
-.back-btn:hover { background: var(--cu-card); color: var(--cu-text); }
-.view-card {
-  background: var(--cu-card); border: 1px solid var(--cu-border);
-  border-radius: var(--radius); padding: 1.5rem;
-}
-.event-header { display: flex; gap: 16px; margin-bottom: 1.25rem; }
-.event-badge {
-  width: 56px; height: 56px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px; flex-shrink: 0;
-}
-.event-meta h2 {
-  font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 4px;
-}
-.event-meta p { font-size: 13px; color: var(--cu-text-muted); }
-.event-detail-row {
-  display: flex; gap: 10px; align-items: flex-start;
-  padding: 10px 0; border-top: 1px solid var(--cu-border); font-size: 14px;
-}
-.event-detail-row .lbl { color: var(--cu-text-hint); min-width: 84px; font-size: 13px; }
-.rsvp-big {
-  font-family: var(--font-body); font-size: 14px; font-weight: 600;
-  color: var(--cu-black); background: var(--cu-gold);
-  border: none; border-radius: var(--radius-sm); padding: 11px 24px;
-  cursor: pointer; margin-top: 1.25rem; transition: opacity 0.15s; width: 100%;
-}
-.rsvp-big:hover { opacity: 0.88; }
-.rsvp-big:disabled { background: #EDFAF4; color: #1A7A50; cursor: default; opacity: 1; }
+    /* ── BOTTOM NAV (mobile) ── */
+    .bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--cuff-white); border-top: 1px solid var(--cuff-border); z-index: 100;
+    }
+    .bnav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      font-size: .65rem; font-weight: 500; color: var(--cuff-muted); padding: .5rem 0;
+      text-decoration: none; cursor: pointer;
+    }
+    .bnav-item.active { color: var(--cuff-navy); }
+    .bnav-item i { font-size: 1.2rem; }
 
-.profile-card { text-align: center; padding: 2rem; }
-.avatar-big {
-  width: 80px; height: 80px; border-radius: 50%; background: var(--cu-gold);
-  margin: 0 auto 1rem;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--cu-black);
-}
-.profile-card h2 { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-.profile-card p { font-size: 13px; color: var(--cu-text-muted); margin-bottom: 1.25rem; }
-.friend-actions { display: flex; gap: 10px; justify-content: center; }
-.btn-accept {
-  font-size: 14px; font-weight: 600; padding: 9px 24px;
-  background: var(--cu-gold); color: var(--cu-black);
-  border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s;
-}
-.btn-accept:hover { opacity: 0.88; }
-.btn-accept:disabled { background: #EDFAF4; color: #1A7A50; cursor: default; opacity: 1; }
-.btn-decline {
-  font-size: 14px; font-weight: 500; padding: 9px 24px;
-  background: none; color: var(--cu-text-muted);
-  border: 1px solid var(--cu-border-strong);
-  border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
-}
-.btn-decline:hover { background: var(--cu-card); color: var(--cu-text); }
+    @media (max-width: 576px) {
+      .navbar-collapse { display: none !important; }
+      .bottom-nav { display: flex; }
+      .view { padding-bottom: 5rem !important; }
+    }
 
-/* TOAST */
-#toast {
-  position: fixed; bottom: 80px; left: 50%;
-  transform: translateX(-50%) translateY(16px);
-  background: var(--cu-black); color: #fff;
-  font-size: 13px; font-weight: 500;
-  padding: 10px 20px; border-radius: 30px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.25s, transform 0.25s;
-  z-index: 999; white-space: nowrap;
-  border: 1px solid rgba(207,184,124,0.4);
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* BOTTOM NAV */
-.bottom-nav {
-  display: none; position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: var(--cu-card); border-top: 1px solid var(--cu-border);
-  padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); z-index: 100;
-}
-@media (max-width: 600px) {
-  .top-nav .nav-links { display: none; }
-  .bottom-nav { display: flex; justify-content: space-around; align-items: center; }
-  .view { padding-bottom: 6rem; }
-  .page-title { font-size: 22px; }
-}
-.bnav-item {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 4px; flex: 1; font-size: 10px; font-weight: 500;
-  color: var(--cu-text-hint); text-decoration: none; padding: 4px; cursor: pointer;
-}
-.bnav-item.active { color: var(--cu-gold-dark); }
-.bnav-icon { font-size: 20px; }
-</style>
+    .empty-state { text-align: center; padding: 3rem 1rem; color: #bbb; }
+    .empty-icon  { font-size: 2.5rem; margin-bottom: 1rem; }
+  </style>
 </head>
 <body>
 
-<nav class="top-nav">
-  <div class="nav-logo" onclick="navigate('notifications')">CUFF<span> · CU Boulder</span></div>
-  <div class="nav-links">
-    <a onclick="navigate('explore')">Explore</a>
-    <a onclick="navigate('myevents')">My Events</a>
-    <a id="nav-notifications" class="active" onclick="navigate('notifications')">Notifications</a>
-    <a onclick="navigate('profile')">Profile</a>
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar navbar-expand-sm sticky-top px-3">
+  <a class="navbar-brand d-flex align-items-center gap-2" onclick="navigate('notifications')" style="cursor:pointer">
+    <span style="background:#fff;color:var(--cuff-navy);font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;padding:3px 6px;border-radius:2px;letter-spacing:.05em;">CU</span>
+    CU FUNCTION FINDER
+  </a>
+  <div class="collapse navbar-collapse" id="navMenu">
+    <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item"><a class="nav-link" onclick="navigate('explore')">Home</a></li>
+        <li class="nav-item"><a class="nav-link" onclick="navigate('explore')">Search</a></li>
+        <li class="nav-item"><a class="nav-link" onclick="navigate('explore')">Map</a></li>
+        <li class="nav-item"><a class="nav-link active" id="nav-notifications" onclick="navigate('notifications')">Notifications</a></li>
+        <li class="nav-item"><a class="nav-link" onclick="navigate('profile')">Account</a></li>
+    </ul>
+    <div class="d-flex gap-2 ms-3">
+      <button class="btn btn-sm" style="color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:4px;font-size:.8rem;">Log In</button>
+      <button class="btn btn-sm" style="background:#fff;color:var(--cuff-navy);border-radius:4px;font-weight:600;font-size:.8rem;">Sign Up</button>
+    </div>
   </div>
-  <div class="nav-avatar">AB</div>
+  <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+    <span class="navbar-toggler-icon" style="filter:invert(1)"></span>
+  </button>
 </nav>
 
-<!-- ══ NOTIFICATIONS VIEW ══ -->
-<main class="view active" id="view-notifications">
-  <div class="page-header">
-    <h1 class="page-title">Notifications <span class="unread-badge" id="unread-count">0</span></h1>
-    <div class="header-actions">
-      <button class="btn-ghost" onclick="markAllRead()">Mark all read</button>
-    </div>
-  </div>
+<!-- ══ VIEW: NOTIFICATIONS ══ -->
+<div class="view active" id="view-notifications">
+  <div class="container" style="max-width:700px; padding-top:2rem; padding-bottom:5rem;">
 
-  <div class="demo-bar">
-    <div class="demo-bar-title">Simulate App Events</div>
-    <div class="demo-buttons">
-      <button class="demo-btn" onclick="triggerRSVP()">✅ RSVP to Event</button>
-      <button class="demo-btn" onclick="triggerFriendRequest()">👋 Friend Request</button>
-      <button class="demo-btn" onclick="triggerPrivateInvite()">🔒 Private Invite</button>
-    </div>
-  </div>
-
-  <div class="filter-tabs">
-    <button class="tab active" onclick="filterTab(this,'all')">All</button>
-    <button class="tab" onclick="filterTab(this,'rsvp')">RSVPs</button>
-    <button class="tab" onclick="filterTab(this,'friend')">Friends</button>
-    <button class="tab" onclick="filterTab(this,'invite')">Invites</button>
-    <button class="tab" onclick="filterTab(this,'event')">Events</button>
-  </div>
-
-  <div id="notif-feed"></div>
-
-  <div class="settings-bar">
-    <div class="settings-bar-header">Notification preferences</div>
-    <div class="settings-row">
-      <div><div class="settings-label">RSVP confirmations</div><div class="settings-sublabel">Immediately after a successful RSVP</div></div>
-      <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
-    </div>
-    <div class="settings-row">
-      <div><div class="settings-label">Friend requests</div><div class="settings-sublabel">When another student sends you a request</div></div>
-      <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
-    </div>
-    <div class="settings-row">
-      <div><div class="settings-label">Private event invites</div><div class="settings-sublabel">When a host sends you a personal invite</div></div>
-      <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
-    </div>
-    <div class="settings-row">
-      <div><div class="settings-label">Event reminders</div><div class="settings-sublabel">1 hour before events you're attending</div></div>
-      <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
-    </div>
-    <div class="settings-row">
-      <div><div class="settings-label">New events near you</div><div class="settings-sublabel">Events posted within 1 mile of campus</div></div>
-      <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
-    </div>
-  </div>
-</main>
-
-<!-- ══ EVENT DETAIL VIEW ══ -->
-<main class="view" id="view-event">
-  <div class="view-header">
-    <button class="back-btn" onclick="navigate('notifications')">← Back</button>
-    <h2 style="font-family:var(--font-display);font-size:18px;font-weight:700;" id="ev-title">Event</h2>
-  </div>
-  <div class="view-card">
-    <div class="event-header">
-      <div class="event-badge" id="ev-emoji" style="background:#F3EDFF;">🎉</div>
-      <div class="event-meta">
-        <h2 id="ev-name">Event Name</h2>
-        <p id="ev-host">Hosted by ···</p>
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <div style="width:14px;height:40px;background:var(--cuff-navy);border-radius:2px;flex-shrink:0;"></div>
+        <h1 class="page-title mb-0">
+          NOTIFICATIONS
+          <span class="unread-pill" id="unread-count">0</span>
+        </h1>
       </div>
+      <button class="btn btn-sm btn-outline-secondary" style="border-radius:4px;font-size:.8rem;" onclick="markAllRead()">Mark all read</button>
     </div>
-    <div class="event-detail-row"><span class="lbl">📍 Where</span><span id="ev-location">···</span></div>
-    <div class="event-detail-row"><span class="lbl">🕐 When</span><span id="ev-time">···</span></div>
-    <div class="event-detail-row"><span class="lbl">ℹ️ About</span><span id="ev-desc">···</span></div>
-    <button class="rsvp-big" id="ev-rsvp-btn" onclick="rsvpFromEvent()">RSVP to this Event</button>
-  </div>
-</main>
+    <hr class="mb-4" style="border-color:var(--cuff-border);" />
 
-<!-- ══ FRIEND PROFILE VIEW ══ -->
-<main class="view" id="view-friend">
-  <div class="view-header">
-    <button class="back-btn" onclick="navigate('notifications')">← Back</button>
-    <h2 style="font-family:var(--font-display);font-size:18px;font-weight:700;">Friend Request</h2>
+
+    <!-- Filter tabs -->
+    <ul class="nav filter-nav mb-3">
+      <li class="nav-item"><button class="nav-link active" onclick="filterTab(this,'all')">All</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'rsvp')">RSVPs</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'friend')">Friends</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'invite')">Invites</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'event')">Events</button></li>
+    </ul>
+
+    <!-- Feed -->
+    <div id="notif-feed" class="d-flex flex-column gap-2"></div>
+
   </div>
-  <div class="view-card">
-    <div class="profile-card">
-      <div class="avatar-big" id="fr-avatar">JM</div>
-      <h2 id="fr-name">Student Name</h2>
-      <p id="fr-major">CU Boulder · ···</p>
-      <div class="friend-actions">
-        <button class="btn-accept" id="fr-accept-btn" onclick="acceptFriend()">Accept</button>
-        <button class="btn-decline" onclick="navigate('notifications')">Decline</button>
+</div>
+
+<!-- ══ VIEW: EVENT DETAIL ══ -->
+<div class="view" id="view-event">
+  <div class="container" style="max-width:700px; padding-top:2rem; padding-bottom:5rem;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <button class="btn btn-sm btn-outline-secondary" onclick="navigate('notifications')">← Back</button>
+      <h2 class="mb-0 fw-bold" style="font-family:'Syne',sans-serif;font-size:1.1rem;" id="ev-title">Event</h2>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+      <div class="d-flex gap-3 align-items-start mb-3">
+        <div class="event-badge" id="ev-emoji" style="background:#F3EDFF;">🎉</div>
+        <div>
+          <h5 class="fw-bold mb-1" style="font-family:'Syne',sans-serif;" id="ev-name">Event Name</h5>
+          <p class="text-muted small mb-0" id="ev-host">Hosted by ···</p>
+        </div>
+      </div>
+      <hr class="my-2" />
+      <div class="row gy-2 small text-muted mb-3">
+        <div class="col-3 fw-500">📍 Where</div><div class="col-9" id="ev-location">···</div>
+        <div class="col-3 fw-500">🕐 When</div><div class="col-9" id="ev-time">···</div>
+        <div class="col-3 fw-500">ℹ️ About</div><div class="col-9" id="ev-desc">···</div>
+      </div>
+      <button class="btn btn-gold mt-2" id="ev-rsvp-btn" onclick="rsvpFromEvent()">RSVP to this Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIEW: FRIEND PROFILE ══ -->
+<div class="view" id="view-friend">
+  <div class="container" style="max-width:700px; padding-top:2rem; padding-bottom:5rem;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <button class="btn btn-sm btn-outline-secondary" onclick="navigate('notifications')">← Back</button>
+      <h2 class="mb-0 fw-bold" style="font-family:'Syne',sans-serif;font-size:1.1rem;">Friend Request</h2>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+      <div class="avatar-big mb-3" id="fr-avatar">JM</div>
+      <h5 class="fw-bold mb-1" style="font-family:'Syne',sans-serif;" id="fr-name">Student</h5>
+      <p class="text-muted small mb-4" id="fr-major">CU Boulder</p>
+      <div class="d-flex justify-content-center gap-3">
+        <button class="btn btn-accept px-4" id="fr-accept-btn" onclick="acceptFriend()">Accept</button>
+        <button class="btn btn-sm btn-outline-secondary px-4" onclick="navigate('notifications')">Decline</button>
       </div>
     </div>
   </div>
-</main>
+</div>
 
-<!-- ══ PRIVATE INVITE VIEW ══ -->
-<main class="view" id="view-invite">
-  <div class="view-header">
-    <button class="back-btn" onclick="navigate('notifications')">← Back</button>
-    <h2 style="font-family:var(--font-display);font-size:18px;font-weight:700;">Private Invite</h2>
-  </div>
-  <div class="view-card">
-    <div class="event-header">
-      <div class="event-badge" style="background:#EEF4FF;">🔒</div>
-      <div class="event-meta">
-        <h2 id="inv-name">Event Name</h2>
-        <p id="inv-host">Invited by ···</p>
-      </div>
+<!-- ══ VIEW: PRIVATE INVITE ══ -->
+<div class="view" id="view-invite">
+  <div class="container" style="max-width:700px; padding-top:2rem; padding-bottom:5rem;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <button class="btn btn-sm btn-outline-secondary" onclick="navigate('notifications')">← Back</button>
+      <h2 class="mb-0 fw-bold" style="font-family:'Syne',sans-serif;font-size:1.1rem;">Private Invite</h2>
     </div>
-    <div class="event-detail-row"><span class="lbl">📍 Where</span><span id="inv-location">···</span></div>
-    <div class="event-detail-row"><span class="lbl">🕐 When</span><span id="inv-time">···</span></div>
-    <div class="event-detail-row"><span class="lbl">ℹ️ About</span><span id="inv-desc">···</span></div>
-    <p style="font-size:13px;color:var(--cu-text-hint);margin-top:1rem;">🔒 Private event — only invited students can attend.</p>
-    <button class="rsvp-big" id="inv-rsvp-btn" onclick="rsvpFromInvite()">Accept Invite &amp; RSVP</button>
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+      <div class="d-flex gap-3 align-items-start mb-3">
+        <div class="event-badge" style="background:#EEF4FF;">🔒</div>
+        <div>
+          <h5 class="fw-bold mb-1" style="font-family:'Syne',sans-serif;" id="inv-name">Event</h5>
+          <p class="text-muted small mb-0" id="inv-host">Invited by ···</p>
+        </div>
+      </div>
+      <hr class="my-2" />
+      <div class="row gy-2 small text-muted mb-3">
+        <div class="col-3 fw-500">📍 Where</div><div class="col-9" id="inv-location">···</div>
+        <div class="col-3 fw-500">🕐 When</div><div class="col-9" id="inv-time">···</div>
+        <div class="col-3 fw-500">ℹ️ About</div><div class="col-9" id="inv-desc">···</div>
+      </div>
+      <p class="small text-muted">🔒 Private event — only invited students can attend.</p>
+      <button class="btn btn-gold" id="inv-rsvp-btn" onclick="rsvpFromInvite()">Accept Invite &amp; RSVP</button>
+    </div>
   </div>
-</main>
+</div>
 
 <!-- ══ STUB VIEWS ══ -->
-<main class="view" id="view-explore">
-  <div class="view-header"><button class="back-btn" onclick="navigate('notifications')">← Back</button><h2 style="font-family:var(--font-display);font-size:18px;font-weight:700;">Explore Events</h2></div>
-  <div class="view-card" style="text-align:center;padding:3rem;color:var(--cu-text-muted);font-size:14px;"><div style="font-size:36px;margin-bottom:1rem;">🔍</div>Browse upcoming campus events here.</div>
-</main>
-<main class="view" id="view-myevents">
-  <div class="view-header"><button class="back-btn" onclick="navigate('notifications')">← Back</button><h2 style="font-family:var(--font-display);font-size:18px;font-weight:700;">My Events</h2></div>
-  <div class="view-card" style="text-align:center;padding:3rem;color:var(--cu-text-muted);font-size:14px;"><div style="font-size:36px;margin-bottom:1rem;">📅</div>Your RSVP'd and saved events appear here.</div>
-</main>
-<main class="view" id="view-profile">
-  <div class="view-header"><button class="back-btn" onclick="navigate('notifications')">← Back</button><h2 style="font-family:var(--font-display);font-size:18px;font-weight:700;">Profile</h2></div>
-  <div class="view-card" style="text-align:center;padding:3rem;color:var(--cu-text-muted);font-size:14px;"><div style="font-size:36px;margin-bottom:1rem;">👤</div>Student profile and settings.</div>
-</main>
+<div class="view" id="view-explore">
+  <div class="container text-center py-5" style="max-width:700px;">
+    <button class="btn btn-sm btn-outline-secondary mb-4" onclick="navigate('notifications')">← Back</button>
+    <div class="empty-icon">🔍</div><p class="text-muted">Browse upcoming campus events here.</p>
+  </div>
+</div>
+<div class="view" id="view-myevents">
+  <div class="container text-center py-5" style="max-width:700px;">
+    <button class="btn btn-sm btn-outline-secondary mb-4" onclick="navigate('notifications')">← Back</button>
+    <div class="empty-icon">📅</div><p class="text-muted">Your RSVP'd and saved events appear here.</p>
+  </div>
+</div>
+<div class="view" id="view-profile">
+  <div class="container text-center py-5" style="max-width:700px;">
+    <button class="btn btn-sm btn-outline-secondary mb-4" onclick="navigate('notifications')">← Back</button>
+    <div class="empty-icon">👤</div><p class="text-muted">Student profile and settings.</p>
+  </div>
+</div>
 
-<div id="toast"></div>
+<!-- Toast -->
+<div id="toast-container">
+  <div class="cuff-toast" id="cuff-toast"></div>
+</div>
 
+<!-- Bottom nav (mobile) -->
 <nav class="bottom-nav">
-  <a class="bnav-item" onclick="navigate('explore')"><span class="bnav-icon">🔍</span>Explore</a>
-  <a class="bnav-item" onclick="navigate('myevents')"><span class="bnav-icon">📅</span>Events</a>
-  <a class="bnav-item active" onclick="navigate('notifications')"><span class="bnav-icon">🔔</span>Alerts</a>
-  <a class="bnav-item" onclick="navigate('profile')"><span class="bnav-icon">👤</span>Profile</a>
+  <a class="bnav-item" onclick="navigate('explore')"><i class="bi bi-search"></i>Explore</a>
+  <a class="bnav-item" onclick="navigate('myevents')"><i class="bi bi-calendar3"></i>Events</a>
+  <a class="bnav-item active" id="bnav-notif" onclick="navigate('notifications')"><i class="bi bi-bell"></i>Alerts</a>
+  <a class="bnav-item" onclick="navigate('profile')"><i class="bi bi-person"></i>Profile</a>
 </nav>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-/* ─── DATA STORE ─── */
+/* ── DATA ── */
 let notifications = [
   {
-    id:'seed-1', type:'event',
-    icon:'🎉', iconClass:'icon-event', tagClass:'tag-event', tagLabel:'Event',
+    id:'seed-1', type:'event', icon:'🎉', iconClass:'icon-event', tagClass:'tag-event', tagLabel:'Event',
     title:'New event: CU Engineering Mixer',
     desc:'ECCE 1B55 · Tonight 7 PM · Free food & networking for engineering students.',
-    timestamp: Date.now() - 18000000, unread:true, destination:'event',
+    timestamp: Date.now() - 18000000, unread: true, destination:'event',
     payload:{ emoji:'🎉', bg:'#F3EDFF', name:'CU Engineering Mixer',
       host:'Hosted by CU Engineering Council', location:'ECCE Building 1B55',
       time:'Tonight · 7:00 – 9:00 PM',
       desc:'Free food, drinks, and networking. Meet recruiters from local firms.' }
   },
   {
-    id:'seed-2', type:'event',
-    icon:'⏰', iconClass:'icon-remind', tagClass:'tag-remind', tagLabel:'Reminder',
+    id:'seed-2', type:'event', icon:'⏰', iconClass:'icon-remind', tagClass:'tag-remind', tagLabel:'Reminder',
     title:'Reminder: CS Club Hackathon starts in 6 hours',
     desc:'ATLAS Institute · 6 PM today. Bring your laptop & student ID.',
-    timestamp: Date.now() - 28800000, unread:true, destination:'event',
+    timestamp: Date.now() - 28800000, unread: true, destination:'event',
     payload:{ emoji:'💻', bg:'#FFF8EC', name:'CS Club Hackathon',
       host:'Hosted by CU CS Club', location:'ATLAS Institute, Room 100',
       time:'Today · 6:00 PM – Midnight',
       desc:'24-hour hackathon open to all CU students. Prizes for top 3 teams.' }
   },
   {
-    id:'seed-3', type:'event',
-    icon:'🎭', iconClass:'icon-event', tagClass:'tag-event', tagLabel:'Event',
+    id:'seed-3', type:'event', icon:'🎭', iconClass:'icon-event', tagClass:'tag-event', tagLabel:'Event',
     title:'CU Theatre: Spring Showcase – Early Bird ends soon',
     desc:'Macky Auditorium · Apr 5. Grab your free ticket before Saturday.',
-    timestamp: Date.now() - 93600000, unread:false, destination:'event',
+    timestamp: Date.now() - 93600000, unread: false, destination:'event',
     payload:{ emoji:'🎭', bg:'#F3EDFF', name:'Spring Theatre Showcase',
       host:'Hosted by CU Department of Theatre', location:'Macky Auditorium',
       time:'Sat Apr 5 · 7:30 PM',
       desc:'An evening of student-directed performances. Free admission, limited seating.' }
   },
   {
-    id:'seed-4', type:'event',
-    icon:'🧗', iconClass:'icon-event', tagClass:'tag-event', tagLabel:'Event',
+    id:'seed-4', type:'event', icon:'🧗', iconClass:'icon-event', tagClass:'tag-event', tagLabel:'Event',
     title:'Waitlist update: Climbing Wall Social',
     desc:'A spot opened up. Confirm within 12 hours to keep your place.',
-    timestamp: Date.now() - 180000000, unread:false, destination:'event',
+    timestamp: Date.now() - 180000000, unread: false, destination:'event',
     payload:{ emoji:'🧗', bg:'#EDFAF4', name:'Climbing Wall Social',
       host:'Hosted by CU Recreation Center', location:'CU Rec Center – Climbing Wall',
       time:'Fri Apr 4 · 5:00 – 8:00 PM',
@@ -531,7 +423,6 @@ let notifications = [
   }
 ];
 
-// Pools for simulation
 const friendPool = [
   { initials:'JM', name:'Jordan Martinez', major:'Computer Science · Junior' },
   { initials:'SR', name:'Sofia Reyes',     major:'Applied Math · Sophomore' },
@@ -539,46 +430,40 @@ const friendPool = [
   { initials:'AK', name:'Amara Kofi',      major:'Environmental Studies · Junior' },
 ];
 const invitePool = [
-  { name:'Rooftop Study Night',  host:'Invited by Alex Chen',    location:'Sewall Hall Rooftop',        time:'Sat Apr 5 · 9 PM',   desc:'A cozy private study & chill session. Bring snacks and headphones.' },
-  { name:'Pre-Game at Kittredge',host:'Invited by Maya Patel',   location:'Kittredge Central',           time:'Fri Apr 4 · 8 PM',   desc:'Small gathering before the CU vs. CSU game. Bring your Buffs gear!' },
-  { name:'CSEN Senior Banquet',  host:'Invited by CSEN Council', location:'Wolf Law Building Atrium',   time:'Thu Apr 10 · 6 PM',  desc:'Invite-only end-of-year banquet for CS seniors. Formal attire.' },
+  { name:'Rooftop Study Night',   host:'Invited by Alex Chen',    location:'Sewall Hall Rooftop',      time:'Sat Apr 5 · 9 PM',  desc:'Cozy private study session. Bring snacks and headphones.' },
+  { name:'Pre-Game at Kittredge', host:'Invited by Maya Patel',   location:'Kittredge Central',         time:'Fri Apr 4 · 8 PM',  desc:'Small gathering before the CU vs. CSU game. Bring your Buffs gear!' },
+  { name:'CSEN Senior Banquet',   host:'Invited by CSEN Council', location:'Wolf Law Building Atrium', time:'Thu Apr 10 · 6 PM', desc:'Invite-only end-of-year banquet for CS seniors. Formal attire.' },
 ];
 const rsvpPool = [
-  { name:'Women in Tech Panel',  location:'ECOT 200',          time:'Wed Apr 2 · 12 PM', desc:'Hear from women leaders in tech. Lunch provided.',               emoji:'👩‍💻', bg:'#F3EDFF' },
-  { name:'CU Jazz Night',        location:'Glenn Miller Ballroom', time:'Thu Apr 3 · 8 PM', desc:'Live jazz by CU student ensembles. Free & open to all.',       emoji:'🎷', bg:'#FFF8EC' },
-  { name:'Campus Clean-Up Day',  location:'Farrand Field',      time:'Sat Apr 5 · 10 AM', desc:'Keep campus beautiful. Supplies provided.',                      emoji:'🌱', bg:'#EDFAF4' },
+  { name:'Women in Tech Panel',  location:'ECOT 200',              time:'Wed Apr 2 · 12 PM', desc:'Hear from women leaders in tech. Lunch provided.',   emoji:'👩‍💻', bg:'#F3EDFF' },
+  { name:'CU Jazz Night',        location:'Glenn Miller Ballroom', time:'Thu Apr 3 · 8 PM',  desc:'Live jazz by CU student ensembles. Free & open.',    emoji:'🎷',  bg:'#FFF8EC' },
+  { name:'Campus Clean-Up Day',  location:'Farrand Field',         time:'Sat Apr 5 · 10 AM', desc:'Keep campus beautiful. Supplies provided.',          emoji:'🌱',  bg:'#EDFAF4' },
 ];
 
-let rsvpedIds    = new Set();
-let acceptedIds  = new Set();
+let rsvpedIds   = new Set();
+let acceptedIds = new Set();
 let currentFilter = 'all';
-let activeEventPayload  = null;
-let activeInvitePayload = null;
-let activeFriendId      = null;
+let activeEventPayload = null, activeInvitePayload = null, activeFriendId = null;
 let rsvpIdx = 0, friendIdx = 0, inviteIdx = 0;
 
-/* ─── TIMESTAMP ─── */
+/* ── TIMESTAMP ── */
 function timeAgo(ts) {
   const d = Date.now() - ts;
-  const m = Math.floor(d / 60000);
-  const h = Math.floor(d / 3600000);
-  const dy = Math.floor(d / 86400000);
-  if (m < 1)   return 'just now';
-  if (m < 60)  return `${m}m ago`;
-  if (h < 24)  return `${h}h ago`;
+  const m = Math.floor(d / 60000), h = Math.floor(d / 3600000), dy = Math.floor(d / 86400000);
+  if (m < 1)    return 'just now';
+  if (m < 60)   return `${m}m ago`;
+  if (h < 24)   return `${h}h ago`;
   if (dy === 1) return 'Yesterday';
   return `${dy} days ago`;
 }
 
-/* ─── RENDER (AC #1: newest first) ─── */
+/* ── RENDER (newest first) ── */
 function render() {
   const feed = document.getElementById('notif-feed');
-  // Sort descending by timestamp — newest at top
   const sorted = [...notifications].sort((a, b) => b.timestamp - a.timestamp);
   const visible = currentFilter === 'all' ? sorted : sorted.filter(n => n.type === currentFilter);
 
-  document.getElementById('unread-count').textContent =
-    notifications.filter(n => n.unread).length;
+  document.getElementById('unread-count').textContent = notifications.filter(n => n.unread).length;
 
   if (visible.length === 0) {
     feed.innerHTML = `<div class="empty-state"><div class="empty-icon">🔔</div><p>No notifications here yet.</p></div>`;
@@ -586,27 +471,26 @@ function render() {
   }
 
   feed.innerHTML = visible.map((n, i) => `
-    <div class="notif-card ${n.unread ? 'unread' : ''}"
-         data-id="${n.id}"
-         style="animation-delay:${i * 0.04}s"
+    <div class="notif-card p-3 ${n.unread ? 'unread' : ''}"
+         data-id="${n.id}" style="animation-delay:${i * 0.04}s"
          onclick="handleClick('${n.id}')">
-      <div class="notif-icon ${n.iconClass}">${n.icon}</div>
-      <div class="notif-body">
-        <div class="notif-header">
-          <span class="notif-title">${n.title}</span>
-          <span class="notif-time">${timeAgo(n.timestamp)}</span>
-        </div>
-        <p class="notif-desc">${n.desc}</p>
-        <div class="notif-footer">
+      <div class="d-flex align-items-start gap-3">
+        <div class="notif-icon ${n.iconClass}">${n.icon}</div>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="d-flex justify-content-between align-items-baseline gap-2 mb-1">
+            <span class="notif-title text-truncate">${n.title}</span>
+            <span class="notif-time">${timeAgo(n.timestamp)}</span>
+          </div>
+          <p class="notif-desc mb-2">${n.desc}</p>
           <span class="notif-tag ${n.tagClass}">${n.tagLabel}</span>
         </div>
+        ${n.unread ? '<div class="unread-dot mt-1"></div>' : ''}
       </div>
-      ${n.unread ? '<div class="unread-dot"></div>' : ''}
     </div>
   `).join('');
 }
 
-/* ─── CLICK → navigate to relevant page (AC #4) ─── */
+/* ── CLICK → navigate (AC #4) ── */
 function handleClick(id) {
   const n = notifications.find(x => x.id === id);
   if (!n) return;
@@ -629,21 +513,17 @@ function handleClick(id) {
 }
 
 function loadEvent(p) {
-  document.getElementById('ev-title').textContent    = p.name;
-  document.getElementById('ev-emoji').textContent    = p.emoji;
+  document.getElementById('ev-title').textContent      = p.name;
+  document.getElementById('ev-emoji').textContent      = p.emoji;
   document.getElementById('ev-emoji').style.background = p.bg;
-  document.getElementById('ev-name').textContent     = p.name;
-  document.getElementById('ev-host').textContent     = p.host;
-  document.getElementById('ev-location').textContent = p.location;
-  document.getElementById('ev-time').textContent     = p.time;
-  document.getElementById('ev-desc').textContent     = p.desc;
+  document.getElementById('ev-name').textContent       = p.name;
+  document.getElementById('ev-host').textContent       = p.host;
+  document.getElementById('ev-location').textContent   = p.location;
+  document.getElementById('ev-time').textContent       = p.time;
+  document.getElementById('ev-desc').textContent       = p.desc;
   const btn = document.getElementById('ev-rsvp-btn');
-  if (rsvpedIds.has(p._id)) {
-    btn.textContent = 'RSVPed ✓'; btn.disabled = true;
-    btn.style.cssText = 'background:#EDFAF4;color:#1A7A50;';
-  } else {
-    btn.textContent = 'RSVP to this Event'; btn.disabled = false; btn.style.cssText = '';
-  }
+  if (rsvpedIds.has(p._id)) { btn.textContent='RSVPed ✓'; btn.disabled=true; }
+  else                       { btn.textContent='RSVP to this Event'; btn.disabled=false; }
 }
 
 function loadFriend(p, id) {
@@ -651,12 +531,8 @@ function loadFriend(p, id) {
   document.getElementById('fr-name').textContent   = p.name;
   document.getElementById('fr-major').textContent  = 'CU Boulder · ' + p.major;
   const btn = document.getElementById('fr-accept-btn');
-  if (acceptedIds.has(id)) {
-    btn.textContent = 'Friends ✓'; btn.disabled = true;
-    btn.style.cssText = 'background:#EDFAF4;color:#1A7A50;';
-  } else {
-    btn.textContent = 'Accept'; btn.disabled = false; btn.style.cssText = '';
-  }
+  if (acceptedIds.has(id)) { btn.textContent='Friends ✓'; btn.disabled=true; }
+  else                      { btn.textContent='Accept';   btn.disabled=false; }
 }
 
 function loadInvite(p) {
@@ -666,101 +542,80 @@ function loadInvite(p) {
   document.getElementById('inv-time').textContent     = p.time;
   document.getElementById('inv-desc').textContent     = p.desc;
   const btn = document.getElementById('inv-rsvp-btn');
-  if (rsvpedIds.has(p._id)) {
-    btn.textContent = 'Attending ✓'; btn.disabled = true;
-    btn.style.cssText = 'background:#EDFAF4;color:#1A7A50;';
-  } else {
-    btn.textContent = 'Accept Invite & RSVP'; btn.disabled = false; btn.style.cssText = '';
-  }
+  if (rsvpedIds.has(p._id)) { btn.textContent='Attending ✓'; btn.disabled=true; }
+  else                       { btn.textContent='Accept Invite & RSVP'; btn.disabled=false; }
 }
 
-/* ─── RSVP from event view (AC #2) ─── */
+/* ── RSVP from event (AC #2) ── */
 function rsvpFromEvent() {
   const p = activeEventPayload;
   if (!p || rsvpedIds.has(p._id)) return;
   rsvpedIds.add(p._id);
   const btn = document.getElementById('ev-rsvp-btn');
   btn.textContent = 'RSVPed ✓'; btn.disabled = true;
-  btn.style.cssText = 'background:#EDFAF4;color:#1A7A50;';
-  // AC #2: generate confirmation notification immediately
-  push({
-    type:'rsvp', icon:'✅', iconClass:'icon-rsvp', tagClass:'tag-rsvp', tagLabel:'RSVP',
+  push({ type:'rsvp', icon:'✅', iconClass:'icon-rsvp', tagClass:'tag-rsvp', tagLabel:'RSVP',
     title:`RSVP confirmed – ${p.name}`,
     desc:`${p.location} · ${p.time}. You're on the list!`,
-    destination:'event', payload: p
-  });
+    destination:'event', payload: p });
   showToast(`RSVP confirmed for ${p.name} ✓`);
 }
 
-/* ─── RSVP from invite view (AC #2) ─── */
+/* ── RSVP from invite (AC #2) ── */
 function rsvpFromInvite() {
   const p = activeInvitePayload;
   if (!p || rsvpedIds.has(p._id)) return;
   rsvpedIds.add(p._id);
   const btn = document.getElementById('inv-rsvp-btn');
   btn.textContent = 'Attending ✓'; btn.disabled = true;
-  btn.style.cssText = 'background:#EDFAF4;color:#1A7A50;';
-  push({
-    type:'rsvp', icon:'✅', iconClass:'icon-rsvp', tagClass:'tag-rsvp', tagLabel:'RSVP',
+  push({ type:'rsvp', icon:'✅', iconClass:'icon-rsvp', tagClass:'tag-rsvp', tagLabel:'RSVP',
     title:`RSVP confirmed – ${p.name}`,
     desc:`${p.location} · ${p.time}. You're attending!`,
-    destination:'invite', payload: p
-  });
+    destination:'invite', payload: p });
   showToast(`You're attending ${p.name} ✓`);
 }
 
-/* ─── Accept friend ─── */
+/* ── Accept friend ── */
 function acceptFriend() {
   if (!activeFriendId || acceptedIds.has(activeFriendId)) return;
   acceptedIds.add(activeFriendId);
   const btn = document.getElementById('fr-accept-btn');
   btn.textContent = 'Friends ✓'; btn.disabled = true;
-  btn.style.cssText = 'background:#EDFAF4;color:#1A7A50;';
   const n = notifications.find(x => x.id === activeFriendId);
   showToast(`Now friends with ${n ? n.payload.name : 'student'} ✓`);
 }
 
-/* ─── DEMO TRIGGERS ─── */
+/* ── DEMO TRIGGERS ── */
 function triggerRSVP() {
-  // AC #2: RSVP notification generated immediately after successful RSVP
   const e = rsvpPool[rsvpIdx % rsvpPool.length]; rsvpIdx++;
   const id = 'rsvp-' + Date.now();
-  push({
-    id, type:'rsvp', icon:'✅', iconClass:'icon-rsvp', tagClass:'tag-rsvp', tagLabel:'RSVP',
+  push({ id, type:'rsvp', icon:'✅', iconClass:'icon-rsvp', tagClass:'tag-rsvp', tagLabel:'RSVP',
     title:`RSVP confirmed – ${e.name}`,
     desc:`${e.location} · ${e.time}. You're on the list!`,
     destination:'event',
     payload:{ emoji:e.emoji, bg:e.bg, name:e.name, host:'Hosted by CU Events',
-              location:e.location, time:e.time, desc:e.desc, _id:id }
-  });
+              location:e.location, time:e.time, desc:e.desc, _id:id } });
   showToast(`RSVP confirmed for ${e.name}`);
 }
 
 function triggerFriendRequest() {
-  // AC #3: friend request notification
   const f = friendPool[friendIdx % friendPool.length]; friendIdx++;
-  push({
-    type:'friend', icon:'👋', iconClass:'icon-friend', tagClass:'tag-friend', tagLabel:'Friend',
+  push({ type:'friend', icon:'👋', iconClass:'icon-friend', tagClass:'tag-friend', tagLabel:'Friend',
     title:`${f.name} sent you a friend request`,
     desc:`${f.major} — wants to connect on CUFF.`,
-    destination:'friend', payload: f
-  });
+    destination:'friend', payload: f });
   showToast(`Friend request from ${f.name}`);
 }
 
 function triggerPrivateInvite() {
-  // AC #4 (invite type): private invite notification from host
   const inv = invitePool[inviteIdx % invitePool.length]; inviteIdx++;
-  push({
-    type:'invite', icon:'🔒', iconClass:'icon-invite', tagClass:'tag-invite', tagLabel:'Invite',
+  push({ type:'invite', icon:'🔒', iconClass:'icon-invite', tagClass:'tag-invite', tagLabel:'Invite',
     title:`Private invite: ${inv.name}`,
     desc:`${inv.host} · ${inv.location} · ${inv.time}`,
-    destination:'invite', payload: inv
-  });
+    destination:'invite', payload: inv });
   showToast(`Private invite received: ${inv.name}`);
 }
 
-/* ─── PUSH (always newest-first via timestamp) ─── */
+/* ── PUSH ── */
 function push(data) {
   const id = data.id || ('n-' + Date.now());
   if (data.payload && !data.payload._id) data.payload._id = id;
@@ -768,49 +623,52 @@ function push(data) {
     id, type:data.type, icon:data.icon,
     iconClass:data.iconClass, tagClass:data.tagClass, tagLabel:data.tagLabel,
     title:data.title, desc:data.desc,
-    timestamp: Date.now(),   // live timestamp for correct sort order
-    unread:true,
+    timestamp: Date.now(), unread: true,
     destination:data.destination, payload:data.payload || null
   });
   render();
 }
 
-/* ─── MARK ALL READ ─── */
+/* ── MARK ALL READ ── */
 function markAllRead() {
   notifications.forEach(n => n.unread = false);
   render();
 }
 
-/* ─── FILTER TABS ─── */
+/* ── FILTER TABS ── */
 function filterTab(btn, cat) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.filter-nav .nav-link').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   currentFilter = cat;
   render();
 }
 
-/* ─── NAVIGATE ─── */
+/* ── NAVIGATE ── */
 function navigate(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   window.scrollTo(0, 0);
-  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.navbar .nav-link').forEach(a => a.classList.remove('active'));
   const link = document.getElementById('nav-' + name);
   if (link) link.classList.add('active');
-  // keep notifications tab highlighted when on a sub-view
-  if (!link) document.getElementById('nav-notifications').classList.add('active');
+  else document.getElementById('nav-notifications').classList.add('active');
+  // bottom nav
+  document.querySelectorAll('.bnav-item').forEach(a => a.classList.remove('active'));
+  const blink = document.getElementById('bnav-' + name);
+  if (blink) blink.classList.add('active');
+  else if (document.getElementById('bnav-notif')) document.getElementById('bnav-notif').classList.add('active');
 }
 
-/* ─── TOAST ─── */
+/* ── TOAST ── */
 function showToast(msg) {
-  const t = document.getElementById('toast');
+  const t = document.getElementById('cu-toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* ─── INIT ─── */
+/* ── INIT ── */
 render();
-setInterval(render, 60000); // refresh timestamps every minute
+setInterval(render, 60000);
 </script>
 </body>
 </html>
