@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: cuff_db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=cuff_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./src/init_data:/docker-entrypoint-initdb.d
+
+  web:
+    build: .
+    container_name: cuff_web
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
