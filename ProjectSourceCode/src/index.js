@@ -3,11 +3,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
+const hbs = require('hbs');
 const app = express();
 
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
+app.set('view options', { layout: 'layouts/main' });
+hbs.registerPartials(path.join(__dirname, 'views/partials'));
 app.use(express.static(path.join(__dirname, 'resources')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -16,6 +18,9 @@ app.get('/home', (req, res) => {
     res.render('pages/home');
 });
 
+app.get('/notifications', (req, res) => {
+  res.render('pages/notifications');
+});
 app.post('/create-checkout-session', async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.create({

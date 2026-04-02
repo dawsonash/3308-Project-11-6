@@ -1,0 +1,141 @@
+{{!< main}}
+<div class="container" style="max-width:700px; padding-top:2rem; padding-bottom:5rem;">
+
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="page-title-bar"></div>
+      <h1 class="page-title mb-0">
+        NOTIFICATIONS
+        <span class="unread-pill" id="unread-count">0</span>
+      </h1>
+    </div>
+    <button class="btn-cuff-outline" onclick="markAllRead()">Mark all read</button>
+  </div>
+  <hr class="mb-4" style="border-color:var(--cuff-border);" />
+
+  <!-- Filter Tabs -->
+  <ul class="nav filter-nav mb-3">
+    <li class="nav-item"><button class="nav-link active" onclick="filterTab(this,'all')">All</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'rsvp')">RSVPs</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'friend')">Friends</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'invite')">Invites</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'event')">Events</button></li>
+  </ul>
+
+  <!-- Notification Feed -->
+  <div id="notif-feed"></div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast-container">
+  <div class="cuff-toast" id="cuff-toast"></div>
+</div>
+
+<!-- Page JavaScript -->
+<script>
+  let notifications = [
+    {
+      id:'seed-1', type:'event', icon:'🎉', iconClass:'icon-event', tagClass:'tag-event', tagLabel:'Event',
+      title:'New event: CU Engineering Mixer',
+      desc:'ECCE 1B55 · Tonight 7 PM · Free food & networking for engineering students.',
+      timestamp: Date.now() - 18000000, unread: true, destination:'/event/1'
+    },
+    {
+      id:'seed-2', type:'event', icon:'⏰', iconClass:'icon-remind', tagClass:'tag-remind', tagLabel:'Reminder',
+      title:'Reminder: CS Club Hackathon starts in 6 hours',
+      desc:'ATLAS Institute · 6 PM today. Bring your laptop & student ID.',
+      timestamp: Date.now() - 28800000, unread: true, destination:'/event/2'
+    },
+    {
+      id:'seed-3', type:'friend', icon:'👋', iconClass:'icon-friend', tagClass:'tag-friend', tagLabel:'Friend',
+      title:'Jordan M. sent you a friend request',
+      desc:'Computer Science · Junior — wants to connect on CUFF.',
+      timestamp: Date.now() - 93600000, unread: false, destination:'/account'
+    },
+    {
+      id:'seed-4', type:'invite', icon:'🔒', iconClass:'icon-invite', tagClass:'tag-invite', tagLabel:'Invite',
+      title:'Private invite: Rooftop Study Night',
+      desc:'Invited by Alex Chen · Sewall Hall Rooftop · Sat Apr 5 · 9 PM',
+      timestamp: Date.now() - 180000000, unread: false, destination:'/event/3'
+    }
+  ];
+
+  let currentFilter = 'all';
+
+  function timeAgo(ts) {
+    const d = Date.now() - ts;
+    const m = Math.floor(d / 60000);
+    const h = Math.floor(d / 3600000);
+    const dy = Math.floor(d / 86400000);
+    if (m < 1)    return 'just now';
+    if (m < 60)   return `${m}m ago`;
+    if (h < 24)   return `${h}h ago`;
+    if (dy === 1) return 'Yesterday';
+    return `${dy} days ago`;
+  }
+
+  function render() {
+    const feed = document.getElementById('notif-feed');
+    const sorted = [...notifications].sort((a, b) => b.timestamp - a.timestamp);
+    const visible = currentFilter === 'all' ? sorted : sorted.filter(n => n.type === currentFilter);
+
+    document.getElementById('unread-count').textContent = notifications.filter(n => n.unread).length;
+
+    if (visible.length === 0) {
+      feed.innerHTML = `<div class="empty-state"><div class="empty-icon">🔔</div><p>No notifications here yet.</p></div>`;
+      return;
+    }
+
+    feed.innerHTML = visible.map((n, i) => `
+      <div class="notif-card p-3 ${n.unread ? 'unread' : ''}"
+           style="animation-delay:${i * 0.04}s"
+           onclick="handleClick('${n.id}')">
+        <div class="d-flex align-items-start gap-3">
+          <div class="notif-icon">${n.icon}</div>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="d-flex justify-content-between align-items-baseline gap-2 mb-1">
+              <span class="notif-title">${n.title}</span>
+              <span class="notif-time">${timeAgo(n.timestamp)}</span>
+            </div>
+            <p class="notif-desc mb-2">${n.desc}</p>
+            <span class="notif-tag ${n.tagClass}">${n.tagLabel}</span>
+          </div>
+          ${n.unread ? '<div class="unread-dot"></div>' : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function handleClick(id) {
+    const n = notifications.find(x => x.id === id);
+    if (!n) return;
+    n.unread = false;
+    render();
+    // navigate to the relevant page
+    window.location.href = n.destination;
+  }
+
+  function markAllRead() {
+    notifications.forEach(n => n.unread = false);
+    render();
+  }
+
+  function filterTab(btn, cat) {
+    document.querySelectorAll('.filter-nav .nav-link').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = cat;
+    render();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('cuff-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  render();
+  setInterval(render, 60000);
+</script>
