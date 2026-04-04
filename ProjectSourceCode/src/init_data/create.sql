@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-CREATE TABLE user_data (
-=======
 CREATE TABLE IF NOT EXISTS user_data (
->>>>>>> MySQL
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     first_name varchar(63) NOT NULL,
     last_name varchar(63) NOT NULL,
@@ -10,11 +6,7 @@ CREATE TABLE IF NOT EXISTS user_data (
     email varchar(255) NOT NULL UNIQUE
 );
 
-<<<<<<< HEAD
-CREATE TABLE reviews(
-=======
 CREATE TABLE IF NOT EXISTS reviews(
->>>>>>> MySQL
     review_ID INT PRIMARY KEY AUTO_INCREMENT,
     rating DECIMAL(1,1) NOT NULL CHECK(rating BETWEEN 0 AND 10),
     review varchar(255),
@@ -24,16 +16,7 @@ CREATE TABLE IF NOT EXISTS reviews(
     CONSTRAINT fk_reviewedID FOREIGN KEY (reviewed_ID) REFERENCES user_data(user_id)
 );
 
-<<<<<<< HEAD
-CREATE TABLE locations(
-    location_ID INT PRIMARY KEY AUTO_INCREMENT,
-    street varchar(255) NOT NULL,
-    building_number SMALLINT NOT NULL,
-    apartment_number SMALLINT
-); --Create City/state/zip as needed
 
-CREATE TABLE events(
-=======
 CREATE TABLE IF NOT EXISTS locations(
     location_ID INT PRIMARY KEY AUTO_INCREMENT,
     street varchar(255) NOT NULL,
@@ -43,7 +26,6 @@ CREATE TABLE IF NOT EXISTS locations(
 ); --Create City/state as needed
 
 CREATE TABLE IF NOT EXISTS events(
->>>>>>> MySQL
     event_id INT AUTO_INCREMENT PRIMARY KEY,
     event_name varchar(63) NOT NULL,
     event_details varchar(255),
@@ -55,11 +37,8 @@ CREATE TABLE IF NOT EXISTS events(
     CONSTRAINT fk_event_location FOREIGN KEY (location_id) REFERENCES locations(location_ID)
 );
 
-<<<<<<< HEAD
-CREATE TABLE events_to_guests(
-=======
+
 CREATE TABLE IF NOT EXISTS events_to_guests(
->>>>>>> MySQL
     event_id INT NOT NULL,
     guest_id INT NOT NULL,
     PRIMARY KEY (event_id, guest_id),
