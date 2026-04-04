@@ -1,0 +1,3 @@
+3/31/26 meeting: was rescheduled 
+4/1/26 meeting:
+Today we discussed this last week. Sawyer created the SQL Database. Dawson was creating The Event Details Page. Ryan was creating the event creation page. Aberham was creating the notification system. Ayub was working on setting up the docker compose and working on the payment aspect. 
