@@ -461,6 +461,17 @@ h1, h2, h3, h4 {
 }
 
 
+/* ── PROFILE HEADER ── */
+.profile-header {
+    display: flex;
+    align-items: center;
+}
+
+.rating-display {
+    color: var(--cuff-navy);
+}
+
+
 /* ── AVATAR ── */
 .avatar-box {
     width: 80px;

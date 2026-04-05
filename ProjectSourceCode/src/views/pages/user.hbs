@@ -1,0 +1,138 @@
+{{!< main}}
+<div
+  class="container"
+  style="max-width:900px; padding-top:2rem; padding-bottom:5rem;"
+>
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">USER PROFILE</h1>
+  </div>
+  <hr class="mb-4" style="border-color:var(--cuff-border);" />
+
+  <div class="profile-header cuff-section mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="avatar-box">{{initials}}</div>
+      <div>
+        <h2 style="font-size:1.1rem; margin-bottom:0.25rem;">{{user.first_name}}
+          {{user.last_name}}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-column layout: Host (left) | Guest (right) -->
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="row g-3 mb-4">
+        <div class="col-6">
+          <div class="stat-box">
+            <div class="stat-value">
+              {{#if avgHostRating}}
+                <span class="rating-display">{{avgHostRating}}</span>
+              {{else}}
+                --
+              {{/if}}
+            </div>
+            <div class="stat-label">HOST RATING</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="stat-box">
+            <div class="stat-value">{{hostedCount}}</div>
+            <div class="stat-label">HOSTED</div>
+          </div>
+        </div>
+      </div>
+      <div class="cuff-section">
+        <div class="cuff-section-title">EVENTS HOSTED</div>
+        {{#if eventsHosted.length}}
+          {{#each eventsHosted}}
+            <div class="cuff-card mb-2">
+              <div class="d-flex align-items-start gap-3">
+                <div class="event-badge">
+                  <i class="bi bi-star"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">{{this.event_name}}</div>
+                  {{#if this.event_details}}
+                    <div style="font-size:0.75rem; color:var(--cuff-muted); margin-top:2px;">{{this.event_details}}</div>
+                  {{/if}}
+                  <div style="font-size:0.7rem; color:var(--cuff-gray-light); margin-top:4px; font-family:'Space Mono',monospace;">
+                    {{this.event_time}}
+                    {{#if this.event_cost}}
+                      &middot; ${{this.event_cost}}
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="bi bi-megaphone"></i>
+            </div>
+            <p>No events hosted yet.</p>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="row g-3 mb-4">
+        <div class="col-6">
+          <div class="stat-box">
+            <div class="stat-value">
+              {{#if avgGuestRating}}
+                <span class="rating-display">{{avgGuestRating}}</span>
+              {{else}}
+                --
+              {{/if}}
+            </div>
+            <div class="stat-label">GUEST RATING</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="stat-box">
+            <div class="stat-value">{{attendedCount}}</div>
+            <div class="stat-label">ATTENDED</div>
+          </div>
+        </div>
+      </div>
+      <div class="cuff-section">
+        <div class="cuff-section-title">EVENTS ATTENDED</div>
+        {{#if eventsAttended.length}}
+          {{#each eventsAttended}}
+            <div class="cuff-card mb-2">
+              <div class="d-flex align-items-start gap-3">
+                <div class="event-badge">
+                  <i class="bi bi-calendar-event"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">{{this.event_name}}</div>
+                  {{#if this.event_details}}
+                    <div style="font-size:0.75rem; color:var(--cuff-muted); margin-top:2px;">{{this.event_details}}</div>
+                  {{/if}}
+                  <div style="font-size:0.7rem; color:var(--cuff-gray-light); margin-top:4px; font-family:'Space Mono',monospace;">
+                    {{this.event_time}}
+                    {{#if this.event_cost}}
+                      &middot; ${{this.event_cost}}
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="bi bi-calendar-x"></i>
+            </div>
+            <p>No events attended yet.</p>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -11,7 +11,7 @@ VALUES
 ('Ethan', 'Thomas', 'ethan111', 'ethan.thomas@email.com'),
 ('Isabella', 'Moore', 'bella222', 'isabella.moore@email.com');
 
-INSERT INTO locations (street, building_number, apartment_number, zip_cpde)
-VALUES 
-('Pleasant St', '1610', '',  '80302');
+INSERT INTO locations (street, building_number, apartment_number, zip_code)
+VALUES
+('Pleasant St', 1610, NULL, 80302);
 
