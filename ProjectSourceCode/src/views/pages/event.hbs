@@ -1,0 +1,109 @@
+{{!< main}}
+<div class="container" style="max-width:800px; padding-top:2rem; padding-bottom:5rem;">
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">EVENT DETAILS</h1>
+    <a href="/home" class="btn-cuff-outline ms-auto">← BACK</a>
+  </div>
+  <hr class="mb-4" style="border-color:var(--cuff-border);" />
+
+  <div class="cuff-section mb-4">
+    <div class="d-flex align-items-start gap-3">
+      <div class="event-badge" style="font-size:2rem; width:64px; height:64px;">
+        {{#if event.event_cost}}🎟{{else}}🎉{{/if}}
+      </div>
+      <div class="flex-grow-1">
+        <h2 style="font-size:1.2rem; margin-bottom:0.25rem;">{{event.event_name}}</h2>
+        {{#if event.event_details}}
+          <p style="font-size:0.8rem; color:var(--cuff-muted); margin-bottom:0.5rem;">{{event.event_details}}</p>
+        {{/if}}
+        <div style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-gray-light);">
+          📅 {{event.event_time}}
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          💰 {{#if event.event_cost}}${{event.event_cost}}{{else}}FREE{{/if}}
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          📍 {{event.street}} {{event.building_number}}{{#if event.apartment_number}}, Apt {{event.apartment_number}}{{/if}}, {{event.zip_code}}
+        </div>
+        <div style="font-size:0.75rem; margin-top:0.5rem;">
+          Hosted by <a href="/user/{{event.host_id}}" style="color:var(--cuff-navy); font-weight:700;">{{event.host_name}}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RSVP section -->
+  {{#if sessionUser}}
+    {{#unless isHost}}
+      <div class="cuff-section mb-4">
+        <div class="cuff-section-title">YOUR RSVP</div>
+        {{#if alreadyRsvpd}}
+          <p style="font-size:0.8rem; color:#065f46; margin-bottom:0.75rem;">✅ You're going to this event!</p>
+          <form method="POST" action="/events/{{event.event_id}}/cancel-rsvp">
+            <button type="submit" class="btn-cuff-outline">CANCEL RSVP</button>
+          </form>
+        {{else}}
+          <form method="POST" action="/events/{{event.event_id}}/rsvp">
+            <button type="submit" class="btn-cuff-action">
+              {{#if event.event_cost}}PAY ${{event.event_cost}} & RSVP{{else}}RSVP — FREE{{/if}}
+            </button>
+          </form>
+        {{/if}}
+      </div>
+    {{/unless}}
+  {{else}}
+    <div class="cuff-section mb-4" style="text-align:center;">
+      <p style="font-size:0.8rem; color:var(--cuff-muted);">
+        <a href="/login" style="color:var(--cuff-navy); font-weight:700;">Log in</a> to RSVP for this event.
+      </p>
+    </div>
+  {{/if}}
+
+  <!-- Guest list -->
+  <div class="cuff-section mb-4">
+    <div class="cuff-section-title">ATTENDEES ({{rsvpCount}})</div>
+    {{#if guests.length}}
+      <div class="d-flex flex-wrap gap-2">
+        {{#each guests}}
+          <a href="/user/{{this.user_id}}" style="text-decoration:none;">
+            <div class="d-flex align-items-center gap-2 cuff-card" style="padding:0.4rem 0.75rem;">
+              <div class="avatar-sm"></div>
+              <span style="font-family:'Space Mono',monospace; font-size:0.75rem;">
+                {{this.first_name}} {{this.last_name}}
+              </span>
+            </div>
+          </a>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="empty-state" style="padding:1.5rem;">
+        <p>No RSVPs yet. Be the first!</p>
+      </div>
+    {{/if}}
+  </div>
+
+  <!-- Leave a review (only if attended and not the host) -->
+  {{#if sessionUser}}
+    {{#if alreadyRsvpd}}
+      {{#unless isHost}}
+        <div class="cuff-section">
+          <div class="cuff-section-title">LEAVE A HOST REVIEW</div>
+          <form method="POST" action="/reviews">
+            <input type="hidden" name="reviewed_id" value="{{event.host_id}}" />
+            <input type="hidden" name="review_type" value="host" />
+            <div class="mb-3">
+              <label class="cuff-section-title" style="display:block;">RATING (0–10)</label>
+              <input class="cuff-input" type="number" name="rating" min="0" max="10" step="0.5" required />
+            </div>
+            <div class="mb-3">
+              <label class="cuff-section-title" style="display:block;">REVIEW (optional)</label>
+              <textarea class="cuff-input" name="review" rows="2" placeholder="How was the event?"></textarea>
+            </div>
+            <button type="submit" class="btn-cuff-primary">SUBMIT REVIEW</button>
+          </form>
+        </div>
+      {{/unless}}
+    {{/if}}
+  {{/if}}
+
+</div>

@@ -69,3 +69,16 @@ INSERT INTO reviews (rating, review_type, review, reviewer_id, reviewed_id) VALU
     (9.0, 'host', 'Super organized', 2, 1),
     (7.0, 'guest', 'Fun to hang with', 1, 2),
     (8.0, 'guest', 'Always on time', 1, 2);
+
+-- Notifications data table
+CREATE TABLE IF NOT EXISTS notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,              -- recipient
+    type VARCHAR(32)  NOT NULL DEFAULT 'general', -- 'rsvp', 'review', 'invite', etc.
+    message TEXT NOT NULL,
+    related_event_id INT,                                -- optional link to an event
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_notif_user  FOREIGN KEY (user_id) REFERENCES user_data(user_id),
+    CONSTRAINT fk_notif_event FOREIGN KEY (related_event_id) REFERENCES events(event_id)
+);

@@ -1,21 +1,27 @@
 <nav class="navbar navbar-expand-sm sticky-top px-3">
-  <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+  <a class="navbar-brand d-flex align-items-center gap-2" href="/home">
     <span class="brand-box">CUFF</span>
     CU FUNCTION FINDER
   </a>
   <div class="collapse navbar-collapse" id="navMenu">
     <ul class="navbar-nav ms-auto align-items-center gap-1">
-      <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+      <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
       <li class="nav-item"><a class="nav-link" href="/search">Search</a></li>
-      <li class="nav-item"><a
-          class="nav-link"
-          href="/notifications"
-        >Notifications</a></li>
-      <li class="nav-item"><a class="nav-link" href="/account">Account</a></li>
+      {{#if sessionUser}}
+        <li class="nav-item"><a class="nav-link" href="/notifications">Notifications</a></li>
+        <li class="nav-item"><a class="nav-link" href="/account">Account</a></li>
+      {{/if}}
     </ul>
     <div class="d-flex gap-2 ms-3">
-      <a href="/login" class="btn-nav-login">Log In</a>
-      <a href="/register" class="btn-nav-signup">Sign Up</a>
+      {{#if sessionUser}}
+        <span style="font-family:'Space Mono',monospace; font-size:0.75rem; color:#9ca3af; align-self:center;">
+          {{sessionUser.first_name}}
+        </span>
+        <a href="/logout" class="btn-nav-login">Log Out</a>
+      {{else}}
+        <a href="/login" class="btn-nav-login">Log In</a>
+        <a href="/register" class="btn-nav-signup">Sign Up</a>
+      {{/if}}
     </div>
   </div>
   <button

@@ -1,0 +1,66 @@
+{{!< main}}
+<div class="container" style="max-width:600px; padding-top:2rem; padding-bottom:5rem;">
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">HOST AN EVENT</h1>
+  </div>
+  <hr class="mb-4" style="border-color:var(--cuff-border);" />
+
+  {{#if error}}
+    <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b;
+         font-family:'Space Mono',monospace; font-size:0.75rem; padding:0.75rem 1rem; margin-bottom:1rem;">
+      {{error}}
+    </div>
+  {{/if}}
+
+  <div class="cuff-section">
+    <form method="POST" action="/events/new">
+
+      <div class="cuff-section-title">EVENT INFO</div>
+      <div class="mb-3">
+        <label class="cuff-section-title" style="display:block;">EVENT NAME *</label>
+        <input class="cuff-input" type="text" name="event_name" placeholder="Study session, game night…" required />
+      </div>
+      <div class="mb-3">
+        <label class="cuff-section-title" style="display:block;">DETAILS</label>
+        <textarea class="cuff-input" name="event_details" rows="3" placeholder="What's the vibe?"></textarea>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-7">
+          <label class="cuff-section-title" style="display:block;">DATE & TIME *</label>
+          <input class="cuff-input" type="datetime-local" name="event_time" required />
+        </div>
+        <div class="col-5">
+          <label class="cuff-section-title" style="display:block;">COST ($)</label>
+          <input class="cuff-input" type="number" name="event_cost" min="0" step="0.01" value="0" placeholder="0 = free" />
+        </div>
+      </div>
+
+      <div class="cuff-section-title mt-3">LOCATION</div>
+      <div class="row g-3 mb-3">
+        <div class="col-8">
+          <label class="cuff-section-title" style="display:block;">STREET *</label>
+          <input class="cuff-input" type="text" name="street" placeholder="University Ave" required />
+        </div>
+        <div class="col-4">
+          <label class="cuff-section-title" style="display:block;">BUILDING # *</label>
+          <input class="cuff-input" type="number" name="building_number" placeholder="1234" required />
+        </div>
+      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-4">
+          <label class="cuff-section-title" style="display:block;">APT # (opt)</label>
+          <input class="cuff-input" type="number" name="apartment_number" placeholder="—" />
+        </div>
+        <div class="col-8">
+          <label class="cuff-section-title" style="display:block;">ZIP CODE *</label>
+          <input class="cuff-input" type="number" name="zip_code" placeholder="80302" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-cuff-primary w-100">CREATE EVENT</button>
+    </form>
+  </div>
+
+</div>

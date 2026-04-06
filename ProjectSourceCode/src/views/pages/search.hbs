@@ -1,0 +1,62 @@
+{{!< main}}
+<div class="container" style="max-width:900px; padding-top:2rem; padding-bottom:5rem;">
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">SEARCH</h1>
+  </div>
+  <hr class="mb-4" style="border-color:var(--cuff-border);" />
+
+  <form method="GET" action="/search" class="d-flex gap-2 mb-4">
+    <input class="cuff-input" type="text" name="q" value="{{query}}" placeholder="Search events or people…" />
+    <button type="submit" class="btn-cuff-primary">GO</button>
+  </form>
+
+  {{#if query}}
+
+    <!-- Events -->
+    <div class="cuff-section-title">EVENTS ({{events.length}})</div>
+    {{#if events.length}}
+      <div class="d-flex flex-column gap-3 mb-4">
+        {{#each events}}
+          <a href="/events/{{this.event_id}}" style="text-decoration:none; color:inherit;">
+            <div class="cuff-card">
+              <div style="font-family:'Space Mono',monospace; font-size:0.85rem; font-weight:700;">{{this.event_name}}</div>
+              {{#if this.event_details}}
+                <div style="font-size:0.75rem; color:var(--cuff-muted);">{{this.event_details}}</div>
+              {{/if}}
+              <div style="font-size:0.7rem; color:var(--cuff-gray-light); font-family:'Space Mono',monospace; margin-top:4px;">
+                {{this.event_time}} &middot; Hosted by {{this.host_name}}
+              </div>
+            </div>
+          </a>
+        {{/each}}
+      </div>
+    {{else}}
+      <p style="font-size:0.8rem; color:var(--cuff-muted); margin-bottom:2rem;">No events matched "{{query}}".</p>
+    {{/if}}
+
+    <!-- Users -->
+    <div class="cuff-section-title">PEOPLE ({{users.length}})</div>
+    {{#if users.length}}
+      <div class="d-flex flex-column gap-2">
+        {{#each users}}
+          <a href="/user/{{this.user_id}}" style="text-decoration:none; color:inherit;">
+            <div class="cuff-card d-flex align-items-center gap-3">
+              <div class="avatar-sm"></div>
+              <div>
+                <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">
+                  {{this.first_name}} {{this.last_name}}
+                </div>
+              </div>
+            </div>
+          </a>
+        {{/each}}
+      </div>
+    {{else}}
+      <p style="font-size:0.8rem; color:var(--cuff-muted);">No users matched "{{query}}".</p>
+    {{/if}}
+
+  {{/if}}
+
+</div>
