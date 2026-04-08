@@ -1,0 +1,377 @@
+{{!< main}}
+<div class="container-fluid" style="max-width:1200px; padding-top:2rem; padding-bottom:5rem;">
+
+  <!-- Page Title -->
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">SEARCH PAGE</h1>
+  </div>
+  <hr style="border-color:var(--cuff-border); margin-bottom:1.5rem;" />
+
+  <!-- Search Bar -->
+  <form method="GET" action="/search" class="d-flex gap-2 mb-4">
+    <div style="position:relative; flex:1;">
+      <i class="bi bi-search" style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); color:var(--cuff-gray-light); font-size:0.85rem;"></i>
+      <input
+        class="cuff-input"
+        style="padding-left:2.25rem;"
+        type="text"
+        name="q"
+        value="{{query}}"
+        placeholder="Search events, themes, dates..."
+      />
+    </div>
+    <button type="submit" class="btn-cuff-primary" style="white-space:nowrap;">[ SEARCH ]</button>
+  </form>
+
+  <!-- Events / Hosts Tab Toggle -->
+  <ul class="nav filter-nav mb-4">
+    <li class="nav-item">
+      <a class="nav-link {{#unless showHosts}}active{{/unless}}" href="/search?q={{query}}&tab=events">
+        🎟 &nbsp;Events
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{#if showHosts}}active{{/if}}" href="/search?q={{query}}&tab=hosts">
+        👤 &nbsp;Hosts
+      </a>
+    </li>
+  </ul>
+
+  <div class="row g-4">
+
+    <!-- ── LEFT SIDEBAR: FILTERS ── -->
+    <div class="col-lg-3">
+      <form method="GET" action="/search">
+        <input type="hidden" name="q" value="{{query}}" />
+        <div class="cuff-section" style="padding:1.25rem;">
+          <div class="cuff-section-title" style="font-size:0.8rem; letter-spacing:0.12em;">FILTERS</div>
+
+          <!-- Date Range -->
+          <div class="mb-4">
+            <div class="filter-group-title">DATE RANGE</div>
+            <div class="d-flex flex-column gap-2">
+              <label class="filter-radio-label"><input type="radio" name="date_range" value="today" /> Today</label>
+              <label class="filter-radio-label"><input type="radio" name="date_range" value="weekend" /> This Weekend</label>
+              <label class="filter-radio-label"><input type="radio" name="date_range" value="week" checked /> This Week</label>
+              <label class="filter-radio-label"><input type="radio" name="date_range" value="month" /> This Month</label>
+              <label class="filter-radio-label"><input type="radio" name="date_range" value="custom" /> Custom Range</label>
+            </div>
+          </div>
+
+          <!-- Event Type -->
+          <div class="mb-4">
+            <div class="filter-group-title">EVENT TYPE</div>
+            <div class="d-flex flex-column gap-2">
+              <label class="filter-check-label"><input type="checkbox" name="type" value="all" /> All Events</label>
+              <label class="filter-check-label"><input type="checkbox" name="type" value="public" checked /> Public Only</label>
+              <label class="filter-check-label"><input type="checkbox" name="type" value="private" /> Private (Friends)</label>
+            </div>
+          </div>
+
+          <!-- Entry Fee -->
+          <div class="mb-4">
+            <div class="filter-group-title">ENTRY FEE</div>
+            <div class="d-flex flex-column gap-2">
+              <label class="filter-radio-label"><input type="radio" name="fee" value="any" checked /> Any</label>
+              <label class="filter-radio-label"><input type="radio" name="fee" value="free" /> Free only</label>
+              <label class="filter-radio-label"><input type="radio" name="fee" value="under5" /> Under $5</label>
+              <label class="filter-radio-label"><input type="radio" name="fee" value="under10" /> Under $10</label>
+              <label class="filter-radio-label"><input type="radio" name="fee" value="10plus" /> $10+</label>
+            </div>
+          </div>
+
+          <!-- Theme -->
+          <div class="mb-4">
+            <div class="filter-group-title">THEME</div>
+            <div class="d-flex flex-wrap gap-1">
+              <button type="button" class="theme-tag active-tag" onclick="toggleTag(this)">Neon</button>
+              <button type="button" class="theme-tag" onclick="toggleTag(this)">Formal</button>
+              <button type="button" class="theme-tag" onclick="toggleTag(this)">Casual</button>
+              <button type="button" class="theme-tag" onclick="toggleTag(this)">Costume</button>
+              <button type="button" class="theme-tag" onclick="toggleTag(this)">Sports</button>
+              <button type="button" class="theme-tag" onclick="toggleTag(this)">Rooftop</button>
+              <button type="button" class="theme-tag" onclick="toggleTag(this)">Pool</button>
+              <button type="button" class="theme-tag" onclick="toggleTag(this)">Outdoor</button>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="mb-4">
+            <div class="filter-group-title">LOCATION / AREA</div>
+            <div class="d-flex flex-column gap-2">
+              <label class="filter-radio-label"><input type="radio" name="location" value="anywhere" checked /> Anywhere</label>
+              <label class="filter-radio-label"><input type="radio" name="location" value="campus" /> Near Campus</label>
+              <label class="filter-radio-label"><input type="radio" name="location" value="hill" /> Hill Area</label>
+              <label class="filter-radio-label"><input type="radio" name="location" value="downtown" /> Downtown Boulder</label>
+              <label class="filter-radio-label"><input type="radio" name="location" value="offcampus" /> Off Campus</label>
+            </div>
+          </div>
+
+          <!-- Min Host Rating -->
+          <div class="mb-4">
+            <div class="filter-group-title">MIN HOST RATING</div>
+            <div class="d-flex flex-column gap-2">
+              <label class="filter-radio-label"><input type="radio" name="min_rating" value="5" /> ★★★★★</label>
+              <label class="filter-radio-label"><input type="radio" name="min_rating" value="4" /> ★★★★☆</label>
+              <label class="filter-radio-label"><input type="radio" name="min_rating" value="3" /> ★★★☆☆</label>
+              <label class="filter-radio-label"><input type="radio" name="min_rating" value="any" checked /> Any rating</label>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-cuff-action" style="font-size:0.72rem; padding:0.5rem 1rem;">APPLY</button>
+            <a href="/search" class="btn-cuff-outline" style="font-size:0.72rem; text-align:center; flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">RESET</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- ── RIGHT: RESULTS ── -->
+    <div class="col-lg-9">
+      <div class="cuff-section" style="padding:1.25rem;">
+
+        <!-- Results Header -->
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+          <div class="cuff-section-title mb-0" style="border-bottom:none; padding-bottom:0;">SEARCH RESULTS</div>
+          <div class="d-flex align-items-center gap-2">
+            <span style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--cuff-muted);">Sort by:</span>
+            <select class="cuff-input" style="width:auto; padding:0.25rem 0.5rem; font-size:0.7rem;">
+              <option>Date (Soonest)</option>
+              <option>Date (Latest)</option>
+              <option>Most Popular</option>
+            </select>
+          </div>
+        </div>
+
+        {{#if query}}
+          <div style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-muted); margin-bottom:1rem;">
+            Showing {{events.length}} events for <strong style="color:var(--cuff-text);">"{{query}}"</strong>
+          </div>
+        {{/if}}
+        <hr style="border-color:var(--cuff-border); margin-bottom:1.25rem;" />
+
+        {{#if query}}
+          {{#if events.length}}
+            <div class="row g-3 mb-4">
+              {{#each events}}
+                <div class="col-md-6 col-xl-4">
+                  <div class="search-event-card">
+                    <div class="search-event-photo">
+                      <div class="photo-placeholder">
+                        <i class="bi bi-image" style="font-size:1.4rem; color:var(--cuff-gray-light);"></i>
+                        <span style="font-size:0.6rem; color:var(--cuff-gray-light); margin-top:2px; font-family:'Space Mono',monospace;">[EVENT PHOTO]</span>
+                      </div>
+                    </div>
+                    <div class="search-event-body">
+                      <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="search-event-name">{{this.event_name}}</div>
+                        <span class="search-public-tag">Public</span>
+                      </div>
+                      <div class="search-event-meta">
+                        <div><span>📅</span> {{this.event_time}}</div>
+                        <div><span>📍</span> {{this.location_text}}</div>
+                        <div><span>👥</span> {{this.rsvp_count}} RSVP'd</div>
+                      </div>
+                      <a href="/events/{{this.event_id}}" class="btn-cuff-outline" style="display:inline-block; margin-top:0.75rem; font-size:0.7rem; text-decoration:none;">
+                        View Details →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              {{/each}}
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center align-items-center gap-1 mt-2">
+              <button class="page-btn">« Prev</button>
+              <button class="page-btn active-page">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <span style="font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--cuff-muted); padding:0 4px;">...</span>
+              <button class="page-btn">8</button>
+              <button class="page-btn">Next »</button>
+            </div>
+
+          {{else}}
+            {{#if users.length}}
+              <div class="cuff-section-title">PEOPLE ({{users.length}})</div>
+              <div class="d-flex flex-column gap-2">
+                {{#each users}}
+                  <a href="/user/{{this.user_id}}" style="text-decoration:none; color:inherit;">
+                    <div class="cuff-card d-flex align-items-center gap-3">
+                      <div class="avatar-sm"></div>
+                      <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">
+                        {{this.first_name}} {{this.last_name}}
+                      </div>
+                    </div>
+                  </a>
+                {{/each}}
+              </div>
+            {{else}}
+              <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <p>No results found for "{{query}}".</p>
+                <p style="font-size:0.7rem;">Try a different search term or adjust your filters.</p>
+              </div>
+            {{/if}}
+          {{/if}}
+        {{else}}
+          <div class="empty-state">
+            <div class="empty-icon">🎉</div>
+            <p>Search for events, themes, or hosts above.</p>
+          </div>
+        {{/if}}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .filter-group-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cuff-gray-dark);
+    margin-bottom: 0.6rem;
+  }
+
+  .filter-radio-label,
+  .filter-check-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--cuff-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .filter-radio-label input,
+  .filter-check-label input {
+    accent-color: var(--cuff-navy);
+  }
+
+  .theme-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border: 1px solid var(--cuff-border);
+    background: var(--cuff-white);
+    color: var(--cuff-gray-dark);
+    cursor: pointer;
+    border-radius: 0;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+
+  .theme-tag:hover,
+  .theme-tag.active-tag {
+    background: var(--cuff-navy);
+    color: #fff;
+    border-color: var(--cuff-navy);
+  }
+
+  .search-event-card {
+    border: 2px solid var(--cuff-border);
+    background: var(--cuff-white);
+    transition: border-color 0.15s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search-event-card:hover {
+    border-color: var(--cuff-gray-mid);
+  }
+
+  .search-event-photo {
+    width: 100%;
+    height: 120px;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--cuff-border);
+    flex-shrink: 0;
+  }
+
+  .photo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .search-event-body {
+    padding: 0.85rem;
+    flex: 1;
+  }
+
+  .search-event-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--cuff-text);
+    line-height: 1.3;
+    flex: 1;
+    margin-right: 6px;
+  }
+
+  .search-public-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border: 1px solid var(--cuff-border);
+    color: var(--cuff-gray-dark);
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+  }
+
+  .search-event-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 6px;
+  }
+
+  .search-event-meta div {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--cuff-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .page-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border: 1px solid var(--cuff-border);
+    background: var(--cuff-white);
+    color: var(--cuff-gray-dark);
+    cursor: pointer;
+    border-radius: 0;
+    transition: all 0.15s;
+  }
+
+  .page-btn:hover,
+  .page-btn.active-page {
+    background: var(--cuff-navy);
+    color: #fff;
+    border-color: var(--cuff-navy);
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  function toggleTag(el) {
+    el.classList.toggle('active-tag');
+  }
+</script>

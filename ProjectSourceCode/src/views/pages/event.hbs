@@ -1,0 +1,512 @@
+{{!< main}}
+<div class="container-fluid" style="max-width:1200px; padding-top:2rem; padding-bottom:5rem;">
+
+  <!-- Page Title -->
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">EVENT DETAILS PAGE</h1>
+  </div>
+  <hr style="border-color:var(--cuff-border); margin-bottom:1.5rem;" />
+
+  <!-- Banner Photo -->
+  <div class="event-banner mb-3">
+    <div class="event-banner-placeholder">
+      <i class="bi bi-image" style="font-size:2rem; color:var(--cuff-gray-light);"></i>
+      <span style="font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--cuff-gray-light); margin-top:6px;">[ EVENT BANNER PHOTO / COVER IMAGE ]</span>
+    </div>
+  </div>
+
+  <!-- Title row: badges + name + RSVP button -->
+  <div class="d-flex align-items-start justify-content-between gap-3 mb-4 flex-wrap">
+    <div>
+      <div class="d-flex gap-2 mb-2">
+        <span class="search-public-tag" style="font-size:0.65rem;">PUBLIC</span>
+        <span class="rsvp-open-tag">RSVP OPEN</span>
+      </div>
+      <h2 style="font-size:1.3rem; font-family:'Space Mono',monospace; font-weight:700; margin-bottom:0.25rem;">
+        {{event.event_name}}
+      </h2>
+      <div style="font-size:0.78rem; color:var(--cuff-muted); font-family:'Space Mono',monospace;">
+        Hosted by <a href="/user/{{event.host_id}}" style="color:var(--cuff-navy); font-weight:700;">{{event.host_name}}</a>
+        {{#if avgHostRating}} &nbsp;★ {{avgHostRating}} Host Rating{{/if}}
+      </div>
+    </div>
+    <div class="d-flex flex-column gap-2" style="min-width:180px;">
+      {{#if sessionUser}}
+        {{#unless isHost}}
+          {{#if alreadyRsvpd}}
+            <form method="POST" action="/events/{{event.event_id}}/cancel-rsvp">
+              <button type="submit" class="btn-cuff-action" style="background:#d1fae5; border-color:#d1fae5; color:#065f46;">✓ RSVP'D — CANCEL</button>
+            </form>
+          {{else}}
+            <form method="POST" action="/events/{{event.event_id}}/rsvp">
+              <button type="submit" class="btn-cuff-action">[ RSVP NOW ]</button>
+            </form>
+          {{/if}}
+        {{/unless}}
+      {{else}}
+        <a href="/login" class="btn-cuff-action" style="text-align:center; text-decoration:none;">[ RSVP NOW ]</a>
+      {{/if}}
+      <div class="d-flex gap-2">
+        <button class="btn-cuff-outline" style="flex:1; font-size:0.7rem;">○ Save</button>
+        <button class="btn-cuff-outline" style="flex:1; font-size:0.7rem;">↗ Share</button>
+        <button class="btn-cuff-outline" style="flex:1; font-size:0.7rem;">⚑ Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main two-column layout -->
+  <div class="row g-4">
+
+    <!-- ── LEFT COLUMN ── -->
+    <div class="col-lg-8">
+
+      <!-- Event Logistics Grid -->
+      <div class="cuff-section mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="cuff-section-title mb-0" style="border-bottom:none; padding-bottom:0;">EVENT LOGISTICS</div>
+          <span style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--cuff-gray-light); font-style:italic;">(formalized event details)</span>
+        </div>
+        <hr style="border-color:var(--cuff-border); margin-bottom:1rem;" />
+        <div class="logistics-grid">
+          <div class="logistics-cell">
+            <div class="logistics-label">📅 DATE</div>
+            <div class="logistics-value">{{event.event_time}}</div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">🕙 TIME</div>
+            <div class="logistics-value">{{event.event_time}}</div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">📍 LOCATION</div>
+            <div class="logistics-value">
+              {{event.street}} {{event.building_number}}{{#if event.apartment_number}}, Apt {{event.apartment_number}}{{/if}}, Boulder
+            </div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">🔥 ENTRY FEE</div>
+            <div class="logistics-value">{{#if event.event_cost}}${{event.event_cost}} at the door{{else}}Free{{/if}}</div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">🎨 THEME</div>
+            <div class="logistics-value">—</div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">👥 CAPACITY</div>
+            <div class="logistics-value">{{rsvpCount}} / — spots</div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">🚫 AGE REQ.</div>
+            <div class="logistics-value">—</div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">🚗 PARKING</div>
+            <div class="logistics-value">—</div>
+          </div>
+          <div class="logistics-cell">
+            <div class="logistics-label">🎵 MUSIC</div>
+            <div class="logistics-value">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Description -->
+      <div class="cuff-section mb-4">
+        <div class="cuff-section-title">EVENT DESCRIPTION</div>
+        <p style="font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--cuff-text); line-height:1.7; margin:0;">
+          {{#if event.event_details}}{{event.event_details}}{{else}}<span style="color:var(--cuff-gray-light);">No description provided.</span>{{/if}}
+        </p>
+      </div>
+
+      <!-- Location Map placeholder -->
+      <div class="cuff-section mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="cuff-section-title mb-0" style="border-bottom:none; padding-bottom:0;">LOCATION MAP</div>
+          <span style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--cuff-gray-light); font-style:italic;">(Interactive map with pin)</span>
+        </div>
+        <hr style="border-color:var(--cuff-border); margin-bottom:1rem;" />
+        <div class="map-placeholder">
+          <i class="bi bi-map" style="font-size:2rem; color:var(--cuff-gray-light);"></i>
+          <span style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-gray-light); margin-top:6px;">
+            [ EMBEDDED MAP — {{event.street}} {{event.building_number}}, BOULDER CO ]
+          </span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <button class="btn-cuff-outline" style="font-size:0.7rem;">[ GET DIRECTIONS ]</button>
+          <span style="font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--cuff-muted);">
+            📍 ~0.4 mi from CU Campus
+          </span>
+        </div>
+      </div>
+
+      <!-- Event Message Board -->
+      <div class="cuff-section mb-4">
+        <div class="cuff-section-title">EVENT MESSAGE BOARD</div>
+        <div class="message-feed mb-3" id="message-feed">
+          <div class="empty-state" style="padding:1.5rem;">
+            <p style="font-size:0.75rem;">No messages yet. Be the first to post!</p>
+          </div>
+        </div>
+        {{#if sessionUser}}
+          <div class="d-flex gap-2">
+            <input class="cuff-input" id="msg-input" type="text" placeholder="[ Post a message or question for the host... ]" />
+            <button class="btn-cuff-primary" onclick="postMessage()" style="white-space:nowrap;">[ POST ]</button>
+          </div>
+        {{else}}
+          <p style="font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--cuff-muted);">
+            <a href="/login" style="color:var(--cuff-navy); font-weight:700;">Log in</a> to post a message.
+          </p>
+        {{/if}}
+      </div>
+
+      <!-- RSVP Section -->
+      <div class="cuff-section mb-4" style="border:2px dashed var(--cuff-border);">
+        <div class="cuff-section-title">RSVP SECTION</div>
+        <div style="font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--cuff-muted); text-align:center; margin-bottom:0.75rem;">
+          {{rsvpCount}} people are going
+          {{#if event.capacity}} · {{spotsLeft}} spots left{{/if}}
+        </div>
+        <!-- Progress bar -->
+        {{#if event.capacity}}
+          <div style="background:var(--cuff-border); height:8px; width:100%; margin-bottom:1rem;">
+            <div style="background:var(--cuff-navy); height:8px; width:{{rsvpPercent}}%;"></div>
+          </div>
+        {{/if}}
+        {{#if sessionUser}}
+          {{#unless isHost}}
+            {{#if alreadyRsvpd}}
+              <form method="POST" action="/events/{{event.event_id}}/cancel-rsvp">
+                <button type="submit" class="btn-cuff-action" style="background:#d1fae5; border-color:#d1fae5; color:#065f46;">
+                  ✓ RSVP — I'M GOING (click to cancel)
+                </button>
+              </form>
+            {{else}}
+              <form method="POST" action="/events/{{event.event_id}}/rsvp">
+                <button type="submit" class="btn-cuff-action">
+                  [ ✓ RSVP — I'M GOING ]
+                </button>
+              </form>
+            {{/if}}
+          {{/unless}}
+        {{else}}
+          <a href="/login" class="btn-cuff-action" style="text-align:center; text-decoration:none; display:block;">
+            [ LOG IN TO RSVP ]
+          </a>
+        {{/if}}
+      </div>
+
+      <!-- Leave a Review (only if attended and not host) -->
+      {{#if sessionUser}}
+        {{#if alreadyRsvpd}}
+          {{#unless isHost}}
+            <div class="cuff-section">
+              <div class="cuff-section-title">LEAVE A HOST REVIEW</div>
+              <form method="POST" action="/reviews">
+                <input type="hidden" name="reviewed_id" value="{{event.host_id}}" />
+                <input type="hidden" name="review_type" value="host" />
+                <div class="mb-3">
+                  <label class="filter-group-title" style="display:block; margin-bottom:0.4rem;">RATING (0–10)</label>
+                  <input class="cuff-input" type="number" name="rating" min="0" max="10" step="0.5" required />
+                </div>
+                <div class="mb-3">
+                  <label class="filter-group-title" style="display:block; margin-bottom:0.4rem;">REVIEW (optional)</label>
+                  <textarea class="cuff-input" name="review" rows="2" placeholder="How was the event?"></textarea>
+                </div>
+                <button type="submit" class="btn-cuff-primary">SUBMIT REVIEW</button>
+              </form>
+            </div>
+          {{/unless}}
+        {{/if}}
+      {{/if}}
+
+      <!-- Breadcrumb -->
+      <div style="margin-top:2rem; font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--cuff-gray-light);">
+        <a href="/home" style="color:var(--cuff-gray-light); text-decoration:none;">Home</a>
+        &nbsp;›&nbsp;
+        <a href="/search" style="color:var(--cuff-gray-light); text-decoration:none;">Events</a>
+        &nbsp;›&nbsp;
+        <span style="color:var(--cuff-text);">{{event.event_name}}</span>
+      </div>
+    </div>
+
+    <!-- ── RIGHT SIDEBAR ── -->
+    <div class="col-lg-4">
+
+      <!-- Host Profile -->
+      <div class="cuff-section mb-4">
+        <div class="cuff-section-title">HOST PROFILE</div>
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="avatar-box" style="width:52px; height:52px; font-size:1rem;">
+            {{#if hostInitials}}{{hostInitials}}{{else}}?{{/if}}
+          </div>
+          <div>
+            <div style="font-family:'Space Mono',monospace; font-size:0.85rem; font-weight:700;">{{event.host_name}}</div>
+            <div style="font-size:0.7rem; color:var(--cuff-muted); font-family:'Space Mono',monospace;">CU Boulder Student</div>
+            {{#if avgHostRating}}
+              <div style="font-size:0.72rem; color:var(--cuff-navy); font-family:'Space Mono',monospace; margin-top:2px;">
+                ★★★★★ {{avgHostRating}}
+              </div>
+            {{/if}}
+          </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <div class="stat-box">
+              <div class="stat-value" style="font-size:1.1rem;">{{hostedCount}}</div>
+              <div class="stat-label">Events Hosted</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-box">
+              <div class="stat-value" style="font-size:1.1rem;">{{#if avgHostRating}}{{avgHostRating}}★{{else}}—{{/if}}</div>
+              <div class="stat-label">Host Rating</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="/user/{{event.host_id}}" class="btn-cuff-outline" style="display:block; text-align:center; text-decoration:none; margin-bottom:0.5rem; font-size:0.72rem;">
+          [ VIEW HOST PROFILE ]
+        </a>
+        <button class="btn-cuff-outline" style="width:100%; font-size:0.72rem;">
+          [ MESSAGE HOST PRIVATELY ]
+        </button>
+      </div>
+
+      <!-- Who's Going -->
+      <div class="cuff-section mb-4">
+        <div class="cuff-section-title">WHO'S GOING</div>
+        {{#if guests.length}}
+          <div class="d-flex flex-wrap gap-1 mb-2">
+            {{#each guests}}
+              <a href="/user/{{this.user_id}}" title="{{this.first_name}} {{this.last_name}}"
+                 style="text-decoration:none;">
+                <div class="avatar-sm" style="display:flex; align-items:center; justify-content:center;
+                     font-family:'Space Mono',monospace; font-size:0.6rem; font-weight:700; color:var(--cuff-navy);">
+                  {{this.first_name.[0]}}
+                </div>
+              </a>
+            {{/each}}
+          </div>
+          <div style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-muted); margin-bottom:0.5rem;">
+            {{rsvpCount}} going
+          </div>
+          {{#each guests}}
+            <div style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-text); padding:3px 0; border-bottom:1px solid var(--cuff-border);">
+              <a href="/user/{{this.user_id}}" style="color:var(--cuff-text); text-decoration:none;">
+                {{this.first_name}} {{this.last_name}}
+              </a>
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="empty-state" style="padding:1rem;">
+            <p style="font-size:0.75rem;">No RSVPs yet.</p>
+          </div>
+        {{/if}}
+      </div>
+
+      <!-- Similar Events -->
+      <div class="cuff-section">
+        <div class="cuff-section-title">SIMILAR EVENTS</div>
+        <div style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-gray-light);">
+          Coming soon...
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .event-banner {
+    width: 100%;
+    height: 220px;
+    background: #e5e7eb;
+    border: 1px solid var(--cuff-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .event-banner-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .rsvp-open-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .search-public-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border: 1px solid var(--cuff-border);
+    color: var(--cuff-gray-dark);
+    letter-spacing: 0.04em;
+  }
+
+  /* Logistics 3-column grid */
+  .logistics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--cuff-border);
+  }
+
+  .logistics-cell {
+    padding: 0.75rem;
+    border-right: 1px solid var(--cuff-border);
+    border-bottom: 1px solid var(--cuff-border);
+  }
+
+  .logistics-cell:nth-child(3n) {
+    border-right: none;
+  }
+
+  .logistics-cell:nth-last-child(-n+3) {
+    border-bottom: none;
+  }
+
+  .logistics-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cuff-gray-mid);
+    margin-bottom: 4px;
+  }
+
+  .logistics-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--cuff-text);
+    font-weight: 400;
+  }
+
+  /* Map placeholder */
+  .map-placeholder {
+    width: 100%;
+    height: 160px;
+    background: #e5e7eb;
+    border: 1px solid var(--cuff-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Message board */
+  .message-bubble {
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 6px;
+    border: 1px solid var(--cuff-border);
+    background: var(--cuff-white);
+  }
+
+  .message-bubble.host-msg {
+    background: var(--cuff-navy);
+    color: #fff;
+    border-color: var(--cuff-navy);
+  }
+
+  .msg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+  }
+
+  .msg-author {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .msg-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--cuff-gray-light);
+  }
+
+  .message-bubble.host-msg .msg-time {
+    color: #9ca3af;
+  }
+
+  .msg-body {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.73rem;
+    line-height: 1.5;
+  }
+
+  .filter-group-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cuff-gray-dark);
+  }
+
+  @media (max-width: 576px) {
+    .logistics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .logistics-cell:nth-child(3n) {
+      border-right: 1px solid var(--cuff-border);
+    }
+    .logistics-cell:nth-child(2n) {
+      border-right: none;
+    }
+  }
+</style>
+
+<script>
+  // Simple client-side message board (posts are not persisted — extend with a real API later)
+  const messages = [];
+  const currentUser = '{{#if sessionUser}}{{sessionUser.first_name}} {{sessionUser.last_name}}{{/if}}';
+
+  function renderMessages() {
+    const feed = document.getElementById('message-feed');
+    if (!feed) return;
+    if (messages.length === 0) {
+      feed.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><p style="font-size:0.75rem;">No messages yet. Be the first to post!</p></div>';
+      return;
+    }
+    feed.innerHTML = messages.map(m => `
+      <div class="message-bubble ${m.isHost ? 'host-msg' : ''}">
+        <div class="msg-header">
+          <span class="msg-author">${m.author}${m.isHost ? ' (Host)' : ''}</span>
+          <span class="msg-time">${m.time}</span>
+        </div>
+        <div class="msg-body">${m.text}</div>
+      </div>
+    `).join('');
+  }
+
+  function postMessage() {
+    const input = document.getElementById('msg-input');
+    if (!input || !input.value.trim()) return;
+    messages.push({
+      author: currentUser || 'You',
+      text: input.value.trim(),
+      time: 'just now',
+      isHost: false,
+    });
+    input.value = '';
+    renderMessages();
+  }
+
+  document.addEventListener('DOMContentLoaded', renderMessages);
+</script>
