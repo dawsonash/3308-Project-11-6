@@ -43,29 +43,57 @@
           </div>
         </div>
       </div>
-      <div class="cuff-section">
-        <div class="cuff-section-title">EVENTS HOSTED</div>
-        {{#if eventsHosted.length}}
-          {{#each eventsHosted}}
+      {{#if recentReviews.length}}
+        <div class="cuff-section mb-4">
+          <div class="cuff-section-title">RECENT REVIEWS</div>
+          {{#each recentReviews}}
             <div class="cuff-card mb-2">
               <div class="d-flex align-items-start gap-3">
                 <div class="event-badge">
-                  <i class="bi bi-star"></i>
+                  <i class="bi bi-chat-quote"></i>
                 </div>
                 <div class="flex-grow-1">
-                  <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">{{this.event_name}}</div>
-                  {{#if this.event_details}}
-                    <div style="font-size:0.75rem; color:var(--cuff-muted); margin-top:2px;">{{this.event_details}}</div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">{{this.first_name}} {{this.last_name}}</span>
+                    <span style="font-size:0.65rem; color:var(--cuff-muted); text-transform:uppercase;">{{this.review_type}}</span>
+                  </div>
+                  {{#if this.review}}
+                    <div style="font-size:0.75rem; color:var(--cuff-muted); margin-top:2px;">{{this.review}}</div>
                   {{/if}}
                   <div style="font-size:0.7rem; color:var(--cuff-gray-light); margin-top:4px; font-family:'Space Mono',monospace;">
-                    {{this.event_time}}
-                    {{#if this.event_cost}}
-                      &middot; ${{this.event_cost}}
-                    {{/if}}
+                    {{this.rating}} / 5
                   </div>
                 </div>
               </div>
             </div>
+          {{/each}}
+        </div>
+      {{/if}}
+      <div class="cuff-section">
+        <div class="cuff-section-title">EVENTS HOSTED</div>
+        {{#if eventsHosted.length}}
+          {{#each eventsHosted}}
+            <a href="/event/{{this.event_id}}" style="text-decoration:none; color:inherit;">
+              <div class="cuff-card mb-2">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="event-badge">
+                    <i class="bi bi-star"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">{{this.event_name}}</div>
+                    {{#if this.event_details}}
+                      <div style="font-size:0.75rem; color:var(--cuff-muted); margin-top:2px;">{{this.event_details}}</div>
+                    {{/if}}
+                    <div style="font-size:0.7rem; color:var(--cuff-gray-light); margin-top:4px; font-family:'Space Mono',monospace;">
+                      {{formatDate this.event_time}}
+                      {{#if this.event_cost}}
+                        &middot; ${{this.event_cost}}
+                      {{/if}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
           {{/each}}
         {{else}}
           <div class="empty-state">
@@ -103,25 +131,27 @@
         <div class="cuff-section-title">EVENTS ATTENDED</div>
         {{#if eventsAttended.length}}
           {{#each eventsAttended}}
-            <div class="cuff-card mb-2">
-              <div class="d-flex align-items-start gap-3">
-                <div class="event-badge">
-                  <i class="bi bi-calendar-event"></i>
-                </div>
-                <div class="flex-grow-1">
-                  <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">{{this.event_name}}</div>
-                  {{#if this.event_details}}
-                    <div style="font-size:0.75rem; color:var(--cuff-muted); margin-top:2px;">{{this.event_details}}</div>
-                  {{/if}}
-                  <div style="font-size:0.7rem; color:var(--cuff-gray-light); margin-top:4px; font-family:'Space Mono',monospace;">
-                    {{this.event_time}}
-                    {{#if this.event_cost}}
-                      &middot; ${{this.event_cost}}
+            <a href="/event/{{this.event_id}}" style="text-decoration:none; color:inherit;">
+              <div class="cuff-card mb-2">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="event-badge">
+                    <i class="bi bi-calendar-event"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700;">{{this.event_name}}</div>
+                    {{#if this.event_details}}
+                      <div style="font-size:0.75rem; color:var(--cuff-muted); margin-top:2px;">{{this.event_details}}</div>
                     {{/if}}
+                    <div style="font-size:0.7rem; color:var(--cuff-gray-light); margin-top:4px; font-family:'Space Mono',monospace;">
+                      {{formatDate this.event_time}}
+                      {{#if this.event_cost}}
+                        &middot; ${{this.event_cost}}
+                      {{/if}}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
           {{/each}}
         {{else}}
           <div class="empty-state">

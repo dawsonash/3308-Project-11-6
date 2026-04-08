@@ -3,11 +3,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const hbs = require('hbs');
 const pgp = require('pg-promise')();
 const app = express();
-const bcrypt = require('bcryptjs');
+
 // Database connection
 const db = pgp({
     host: process.env.POSTGRES_HOST || 'db',
@@ -28,10 +29,10 @@ app.use(express.static(path.join(__dirname, 'resources')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'super_secret_key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 24 hours
+    secret: process.env.SESSION_SECRET || 'super_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 24 hours
 }));
 
 // Make session user available in all HBS templates
@@ -50,10 +51,6 @@ const requireAuth = (req, res, next) => {
 
 // Redirect routes
 app.get('/', (req, res) => res.redirect('/home'));
-
-app.get('/home', (req, res) => {
-    res.render('pages/home');
-});
 
 // ----------------------------------------------------------------------------------------------
 // REGISTER API CALLS:
@@ -207,7 +204,7 @@ app.get('/events/:id', async (req, res) => {
 
     try {
         const event = await db.oneOrNone(`
-            SELECT e.*, 
+            SELECT e.*,
                    u.first_name || ' ' || u.last_name AS host_name,
                    u.user_id AS host_id,
                    l.street, l.building_number, l.apartment_number, l.zip_code
@@ -331,7 +328,7 @@ app.get('/events/:id/checkout', requireAuth, async (req, res) => {
         const event = await db.oneOrNone('SELECT * FROM events WHERE event_id = $1', [eventId]);
         if (!event) return res.status(404).send('Event not found');
 
-        const session = await stripe.checkout.sessions.create({
+        const stripeSession = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
                 price_data: {
@@ -346,7 +343,7 @@ app.get('/events/:id/checkout', requireAuth, async (req, res) => {
             cancel_url: `${process.env.BASE_URL || 'http://localhost:3000'}/events/${eventId}`,
         });
 
-        res.redirect(303, session.url);
+        res.redirect(303, stripeSession.url);
     } catch (err) {
         console.error('Stripe checkout error:', err);
         res.status(500).send('Payment setup failed');
