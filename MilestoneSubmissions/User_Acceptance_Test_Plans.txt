@@ -1,0 +1,51 @@
+Feature 1: Testing Account Registration And Login
+Test Cases: 
+User will create an account
+User will then login to the account created 
+Test Data:
+The user will use their first name and last name with (test1234) as their password and email@email.com as their email. No other data is needed by the user. The server will have the data of first name, last name, email, and hashed password
+	Test environment: 
+		We will test this first using local host.
+	Test Results:
+A successful test will have the results of the  user successfully creating an account and then logging into that account. 
+A failed test will show either an error with account registration or with logging in. you can see which by looking at the database and checking to see if the user was added to the account database. 
+	Testers:
+For this test we are going to use random people from our lives i.e. roommates, classmates, etc
+	Test Plan:
+We will place the homepage of the website in front of the tester. We will ask the tester to please navigate to the register page, create an account with the password test1234 and the email email@email.com then login to that account. We will then watch the users create an account. 
+
+Feature 2: Testing The Search Event feature. 
+	Test Cases: 
+User will search for an event
+Test Data:
+The data needed will be a set of 100 different events and a dummy account and a set of “hosts” with different host ratings.  
+You will also need information about the events the user is looking for so you can provide it to the users. 
+
+	Test environment: 
+		We will test this first using local host.
+	Test Results:
+A successful test will have the user being able to find different specific events using the search function. 
+A failed test would either have the search function not working, the users being unable to find the events or the users having to scroll through the events to find the events 
+	Testers:
+For this test we are going to use random people from our lives i.e. roommates, classmates, etc
+	Test Plan:
+We will place the search page of the website in front of the tester already logged in to a dummy account. We will ask the tester to please use the search bar to find the event with the name (name). Once they do or are unable to find it we will then give them a date  and ask them to find an event on that day with an entry fee of 8$. Once they do or are unable to, we will ask them to find an event with a host rating of 4.4 that is off campus. 
+
+
+
+Feature 3: Event Creation
+	Test Cases: 
+User will create an event
+Test Data:
+The data needed will be a dummy account.
+	Test environment: 
+		We will test this first using local host.
+	Test Results:
+A successful test will have the user being able to create an event given specifications about the event. And have the event appear in the database 
+A failed test would have the user unable to create the event or the event not appearing in the database.
+	Testers:
+For this test we are going to use random people from our lives i.e. roommates, classmates, etc
+	Test Plan:
+We will place the homepage of the website in front of the user already logged into the dummy account. We will ask them to create an event. Then we will provide the information of the event i.e. the event name, the event cost, the event time, the location, and any event details. 
+
+
