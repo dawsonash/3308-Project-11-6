@@ -125,12 +125,12 @@
                          e.g. { first_name, last_name, user_id }.
 
                       3. Template: Replace the static placeholder avatars below with
-                         an {{#each this.friends_attending}} loop. Render each friend's
+                         an #each this.friends_attending loop. Render each friend's
                          initials inside the avatar-sm div. Show the count like
                          "3 friends going" instead of the generic label.
 
                       4. Hide this section entirely if the user is not logged in
-                         (wrap in {{#if ../sessionUser}}) or if friends_attending
+                         (wrap in #if ../sessionUser) or if friends_attending
                          is empty.
                     -->
                     <div class="d-flex align-items-center gap-1">
@@ -186,7 +186,7 @@
          Pass the result as "friendActivity" to the template.
 
       3. Template: Replace the placeholder div below with an
-         {{#each friendActivity}} loop. Each item should show:
+         #each friendActivity loop. Each item should show:
            - Friend's avatar (initials in avatar-sm)
            - Friend's name (link to /user/:id)
            - Activity text, e.g. "RSVPd to Event Name"
@@ -210,7 +210,7 @@
 
         {{#if sessionUser}}
           <div class="d-flex flex-column gap-3">
-            <!-- Placeholder items — replace with {{#each friendActivity}} loop -->
+            <!-- Placeholder items — replace with #each friendActivity loop -->
             <div class="d-flex gap-2 align-items-start" style="opacity:0.5;">
               <div class="avatar-sm" style="background:var(--cuff-gray-dark);"></div>
               <div style="min-width:0;">
