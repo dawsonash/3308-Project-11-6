@@ -1,0 +1,103 @@
+{{!< main}}
+<div class="container" style="max-width:900px; padding-top:2rem; padding-bottom:5rem;">
+
+  <!-- Page Title -->
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">LOG-IN PAGE</h1>
+  </div>
+  <hr style="border-color:var(--cuff-border); margin-bottom:2rem;" />
+
+  <!-- Login Card -->
+  <div style="max-width:480px; margin:0 auto;">
+    <div class="cuff-section" style="padding:0;">
+
+      <!-- Card Header -->
+      <div style="background:var(--cuff-surface); border-bottom:1px solid var(--cuff-border); padding:0.6rem 1rem;">
+        <span style="font-family:'Space Mono',monospace; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--cuff-gray-mid);">LOGIN FORM</span>
+      </div>
+
+      <!-- Card Body -->
+      <div style="padding:2rem 2rem 1.5rem;">
+
+        <!-- CU Logo + Welcome -->
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:1.75rem;">
+          <div style="width:56px; height:56px; background:var(--cuff-navy); display:flex; align-items:center; justify-content:center; margin-bottom:0.75rem;">
+            <span style="font-family:'Space Mono',monospace; font-size:1rem; font-weight:700; color:#fff; letter-spacing:0.05em;">CU</span>
+          </div>
+          <span style="font-family:'Space Mono',monospace; font-size:0.78rem; font-weight:700; letter-spacing:0.12em; color:var(--cuff-text); text-transform:uppercase;">WELCOME BACK!</span>
+        </div>
+
+        <!-- Error message -->
+        {{#if error}}
+          <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; font-family:'Space Mono',monospace; font-size:0.72rem; padding:0.65rem 0.9rem; margin-bottom:1.25rem;">
+            {{error}}
+          </div>
+        {{/if}}
+
+        <form method="POST" action="/login">
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label style="font-family:'Space Mono',monospace; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--cuff-gray-dark); display:block; margin-bottom:0.4rem;">
+              CU EMAIL OR USERNAME
+            </label>
+            <input
+              class="cuff-input"
+              type="email"
+              name="email"
+              placeholder="yourname@colorado.edu"
+              required
+            />
+          </div>
+
+          <!-- Password -->
+          <div class="mb-3">
+            <label style="font-family:'Space Mono',monospace; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--cuff-gray-dark); display:block; margin-bottom:0.4rem;">
+              PASSWORD
+            </label>
+            <input
+              class="cuff-input"
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          <!-- Remember me + Forgot password -->
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <label style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-muted); display:flex; align-items:center; gap:7px; cursor:pointer;">
+              <input type="checkbox" name="remember_me" style="accent-color:var(--cuff-navy); width:13px; height:13px;" />
+              Remember me
+            </label>
+            <a href="#" style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-muted); text-decoration:underline;">
+              Forgot password?
+            </a>
+          </div>
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            style="width:100%; font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700; color:#fff; background:var(--cuff-navy); border:2px solid var(--cuff-navy); padding:0.75rem 1rem; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:background 0.15s;"
+            onmouseover="this.style.background='var(--cuff-navy-light)'"
+            onmouseout="this.style.background='var(--cuff-navy)'"
+          >
+            [ LOG IN → ]
+          </button>
+
+        </form>
+
+        <!-- Sign up link -->
+        <div style="text-align:center; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--cuff-border);">
+          <span style="font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--cuff-muted);">
+            Don't have an account?
+            <a href="/register" style="color:var(--cuff-navy); font-weight:700; text-decoration:underline;">Sign Up</a>
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
