@@ -14,7 +14,6 @@ app.use(express.json());
 app.use('/api/stripe', stripeRoutes);
 
 
-// Database connection
 const db = pgp({
     host: process.env.POSTGRES_HOST || 'db',
     port: 5432,
