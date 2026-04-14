@@ -9,6 +9,7 @@ const hbs = require('hbs');
 const pgp = require('pg-promise')();
 const app = express();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 const bcrypt = require('bcryptjs');
 =======
 const stripeRoutes = require('./routes/stripeRoutes');
@@ -17,6 +18,9 @@ app.use(express.json());
 app.use('/api/stripe', stripeRoutes);
 
 
+>>>>>>> Stashed changes
+=======
+const bcrypt = require('bcryptjs');
 >>>>>>> Stashed changes
 // Database connection
 const db = pgp({

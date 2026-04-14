@@ -70,6 +70,7 @@ INSERT INTO reviews (rating, review_type, review, reviewer_id, reviewed_id) VALU
     (7.0, 'guest', 'Fun to hang with', 1, 2),
     (8.0, 'guest', 'Always on time', 1, 2);
 
+<<<<<<< Updated upstream
 -- Notifications data table
 CREATE TABLE IF NOT EXISTS notifications (
     notification_id SERIAL PRIMARY KEY,
@@ -82,3 +83,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     CONSTRAINT fk_notif_user  FOREIGN KEY (user_id) REFERENCES user_data(user_id),
     CONSTRAINT fk_notif_event FOREIGN KEY (related_event_id) REFERENCES events(event_id)
 );
+=======
+
+    
+>>>>>>> Stashed changes
