@@ -108,6 +108,11 @@
                 </div>
               </div>
             </a>
+            {{#if this.event_cost}}
+              <div class="px-3 pb-3 mt-n2">
+                <button onclick="handleRSVP('{{this.event_id}}', '{{this.event_name}}', {{this.event_cost}})" class="btn-cuff-primary w-100" style="font-size:0.75rem; padding:0.4rem;">RSVP & Pay</button>
+              </div>
+            {{/if}}
           {{/each}}
         </div>
       {{else}}
@@ -120,7 +125,6 @@
           {{/if}}
         </div>
       {{/if}}
-
     </div>
 
     <!--
@@ -224,3 +228,44 @@
   </div>
 
 </div>
+
+<script>
+  /**
+   * This function MUST be named handleRSVP to match your button's onclick
+   */
+  async function handleRSVP(eventId, eventName, price) {
+    // If price is missing or not a number, default to 0 or handle error
+    const numericPrice = parseFloat(price) || 0;
+
+    console.log("Attempting RSVP for:", { eventId, eventName, numericPrice });
+
+    try {
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+          eventId: eventId, 
+          eventName: eventName, 
+          price: numericPrice 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        // Redirect to Stripe
+        window.location.href = data.url;
+      } else {
+        console.error("Stripe Session Error:", data);
+        alert("Payment Error: " + (data.error || "Could not initialize checkout"));
+      }
+    } catch (err) {
+      console.error("Network or Server Error:", err);
+      alert("Critical Error: Please check the console logs.");
+    }
+  }
+</script>
+
+

@@ -8,6 +8,11 @@ const session = require('express-session');
 const hbs = require('hbs');
 const pgp = require('pg-promise')();
 const app = express();
+const stripeRoutes = require('./routes/stripeRoutes');
+
+app.use(express.json());
+app.use('/api/stripe', stripeRoutes);
+
 
 // Database connection
 const db = pgp({
