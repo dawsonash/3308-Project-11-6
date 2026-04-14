@@ -9,8 +9,6 @@ const hbs = require('hbs');
 const pgp = require('pg-promise')();
 const app = express();
 const bcrypt = require('bcryptjs');
->>>>>>> Stashed changes
-// Database connection
 const db = pgp({
     host: process.env.POSTGRES_HOST || 'db',
     port: 5432,
