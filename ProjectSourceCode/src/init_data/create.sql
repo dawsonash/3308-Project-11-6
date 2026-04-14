@@ -73,8 +73,7 @@ INSERT INTO reviews (rating, review_type, review, reviewer_id, reviewed_id) VALU
     (9.0, 'host', 'Super organized', 2, 1),
     (7.0, 'guest', 'Fun to hang with', 1, 2),
     (8.0, 'guest', 'Always on time', 1, 2);
-
-<<<<<<< Updated upstream
+    
 -- Notifications data table
 CREATE TABLE IF NOT EXISTS notifications (
     notification_id SERIAL PRIMARY KEY,
