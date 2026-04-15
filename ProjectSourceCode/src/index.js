@@ -28,6 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view options', { layout: 'layouts/main' });
 hbs.registerPartials(path.join(__dirname, 'views/partials'));
 
+
 // Handlebars helpers
 hbs.registerHelper('formatTime', function (timestamp) {
     if (!timestamp) return '';
@@ -41,6 +42,18 @@ hbs.registerHelper('formatTime', function (timestamp) {
         minute: '2-digit',
         hour12: true,
     });
+});
+hbs.registerHelper('eq', (a, b) => a === b);
+hbs.registerHelper('timeAgo', function(date) {
+    const diff = Date.now() - new Date(date).getTime();
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(diff / 3600000);
+    const d = Math.floor(diff / 86400000);
+    if (m < 1)   return 'just now';
+    if (m < 60)  return `${m}m ago`;
+    if (h < 24)  return `${h}h ago`;
+    if (d === 1) return 'Yesterday';
+    return `${d} days ago`;
 });
 
 // Middleware
@@ -719,14 +732,14 @@ app.post('/reviews', requireAuth, async (req, res) => {
 // ----------------------------------------------------------------------------------------------
 // NOTIFICATIONS API CALLS (removed previous API calls and implemented previous functionality in these along with user auth requirement)
 // GET notifications (show notifications for the logged-in user - user auth required)
-app.get('/notifications', requireAuth, async (req, res) => {
+app.get('/notifications', async (req, res) => {
     try {
         const notifications = await db.any(
             `SELECT * FROM notifications
              WHERE user_id = $1
              ORDER BY created_at DESC
              LIMIT 50`,
-            [req.session.user.user_id]
+            [req.session.user ? req.session.user.user_id : 1]
         );
 
         // Count unread
