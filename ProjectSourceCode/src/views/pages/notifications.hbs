@@ -16,13 +16,19 @@
     </form>
   </div>
   <hr class="mb-4" style="border-color:var(--cuff-border);" />
-
+<ul class="nav filter-nav mb-3">
+  <li class="nav-item"><button class="nav-link active" onclick="filterTab(this,'all')">All</button></li>
+  <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'rsvp')">RSVPs</button></li>
+  <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'friend')">Friends</button></li>
+  <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'invite')">Invites</button></li>
+  <li class="nav-item"><button class="nav-link" onclick="filterTab(this,'event')">Events</button></li>
+</ul>
   <!-- Notification Feed -->
   {{#if notifications.length}}
     <div class="d-flex flex-column gap-2">
       {{#each notifications}}
-        <a href="{{this.link}}" style="text-decoration:none;">
-          <div class="notif-card p-3 {{#unless this.is_read}}unread{{/unless}}">
+        <a href="{{#if (eq this.type 'friend')}}/account{{else if this.related_event_id}}/events/{{this.related_event_id}}{{else}}/home{{/if}}" style="text-decoration:none;">
+          <div class="notif-card p-3 {{#unless this.is_read}}unread{{/unless}}" data-type="{{this.type}}">
             <div class="d-flex align-items-start gap-3">
               <div class="notif-icon">
                 {{#if (eq this.type 'rsvp')}}✅{{/if}}
@@ -33,7 +39,7 @@
               <div class="flex-grow-1 overflow-hidden">
                 <div class="d-flex justify-content-between align-items-baseline gap-2 mb-1">
                   <span class="notif-title">{{this.message}}</span>
-                  <span class="notif-time">{{this.created_at}}</span>
+                  <span class="notif-time">{{timeAgo this.created_at}}</span>
                 </div>
                 <span class="notif-tag tag-{{this.type}}">{{this.type}}</span>
               </div>
@@ -58,3 +64,16 @@
 <div id="toast-container">
   <div class="cuff-toast" id="cuff-toast"></div>
 </div>
+<script>
+function filterTab(btn, cat) {
+    document.querySelectorAll('.filter-nav .nav-link').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.notif-card').forEach(card => {
+        if (cat === 'all' || card.dataset.type === cat) {
+            card.parentElement.style.display = 'block';
+        } else {
+            card.parentElement.style.display = 'none';
+        }
+    });
+}
+</script>
