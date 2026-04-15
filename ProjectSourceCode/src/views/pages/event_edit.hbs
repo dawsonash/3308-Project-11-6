@@ -1,0 +1,352 @@
+{{!< main}}
+<div class="container-fluid" style="max-width:1200px; padding-top:2rem; padding-bottom:5rem;">
+
+  <!-- Page Title -->
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">EDIT EVENT</h1>
+  </div>
+  <hr style="border-color:var(--cuff-border); margin-bottom:1.5rem;" />
+
+  {{#if error}}
+    <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b;
+         font-family:'Space Mono',monospace; font-size:0.75rem; padding:0.75rem 1rem; margin-bottom:1.25rem;">
+      {{error}}
+    </div>
+  {{/if}}
+
+  <form method="POST" action="/events/{{event.event_id}}/edit" id="edit-event-form">
+  <div class="row g-4">
+
+    <!-- LEFT: FORM STEPS -->
+    <div class="col-lg-8">
+
+      <!-- STEP 1: EVENT BASICS -->
+      <div class="creation-step mb-4">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <span class="step-title">STEP 1: EVENT BASICS</span>
+        </div>
+        <div style="padding:1.25rem;">
+
+          <div class="mb-3">
+            <label class="creation-label">EVENT NAME</label>
+            <input class="cuff-input" type="text" name="event_name" value="{{event.event_name}}"
+                   placeholder="e.g. Neon Rave Night 2025"
+                   oninput="updatePreview('name', this.value)" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="creation-label">EVENT DESCRIPTION</label>
+            <textarea class="cuff-input" name="event_details" rows="4"
+                      placeholder="[ Describe your event: what to expect, dress code, any rules for guests, etc... ]"
+                      maxlength="500"
+                      oninput="updateCharCount(this); updateChecklist('desc', this.value.length > 0);">{{event.event_details}}</textarea>
+            <div style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--cuff-gray-light); margin-top:4px;">
+              <span id="char-count">0</span> / 500 characters
+            </div>
+          </div>
+
+          <div class="mb-1">
+            <label class="creation-label">EVENT TYPE</label>
+          </div>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="event-type-option {{#unless event.event_type}}selected{{/unless}}{{#if isPublic}}selected{{/if}}" id="type-public" onclick="selectType('public', this)">
+                <input type="radio" name="event_type" value="public" {{#unless event.event_type}}checked{{/unless}}{{#if isPublic}}checked{{/if}} style="display:none;" />
+                <span style="font-size:1rem;">&#127760;</span>
+                <div>
+                  <div style="font-weight:700; font-size:0.8rem;">PUBLIC</div>
+                  <div style="font-size:0.68rem; color:var(--cuff-gray-light);">Visible to all</div>
+                </div>
+              </label>
+            </div>
+            <div class="col-6">
+              <label class="event-type-option {{#if isPrivate}}selected{{/if}}" id="type-private" onclick="selectType('private', this)">
+                <input type="radio" name="event_type" value="private" {{#if isPrivate}}checked{{/if}} style="display:none;" />
+                <span style="font-size:1rem;">&#128274;</span>
+                <div>
+                  <div style="font-weight:700; font-size:0.8rem;">PRIVATE</div>
+                  <div style="font-size:0.68rem; color:var(--cuff-gray-light);">Friends & invited users only</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: EVENT LOGISTICS -->
+      <div class="creation-step mb-4">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <span class="step-title">STEP 2: EVENT LOGISTICS</span>
+        </div>
+        <div style="padding:1.25rem;">
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="creation-label">EVENT DATE</label>
+              <input class="cuff-input" type="date" name="event_date" value="{{formDate}}"
+                     oninput="updateChecklist('date', this.value.length > 0); syncDatetime();" required />
+            </div>
+            <div class="col-md-6">
+              <label class="creation-label">START TIME</label>
+              <input class="cuff-input" type="time" name="start_time" value="{{formTime}}"
+                     oninput="syncDatetime();" required />
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="creation-label">END TIME</label>
+              <input class="cuff-input" type="time" name="end_time" />
+            </div>
+            <div class="col-md-6">
+              <label class="creation-label">CAPACITY (MAX GUESTS)</label>
+              <input class="cuff-input" type="number" name="capacity" min="1" placeholder="e.g. 50"
+                     value="{{event.max_capacity}}"
+                     oninput="updateChecklist('capacity', this.value.length > 0)" />
+            </div>
+          </div>
+
+          <!-- Hidden combined datetime field for backend -->
+          <input type="hidden" name="event_time" id="event_time_combined" />
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="creation-label">STREET *</label>
+              <input class="cuff-input" type="text" name="street" value="{{event.street}}" placeholder="University Ave" required />
+            </div>
+            <div class="col-md-4">
+              <label class="creation-label">BUILDING # *</label>
+              <input class="cuff-input" type="number" name="building_number" value="{{event.building_number}}" placeholder="1234" required />
+            </div>
+            <div class="col-md-4">
+              <label class="creation-label">ZIP *</label>
+              <input class="cuff-input" type="number" name="zip_code" value="{{event.zip_code}}" placeholder="80302" required />
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="creation-label">ENTRY FEE</label>
+              <input class="cuff-input" type="text" name="event_cost" value="{{event.event_cost}}"
+                     placeholder="e.g. $5 or Free"
+                     oninput="updateChecklist('fee', this.value.length > 0); updatePreview('fee', this.value);" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: PRIVACY & GUEST ACCESS -->
+      <div class="creation-step mb-4">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <span class="step-title">STEP 3: PRIVACY & GUEST ACCESS</span>
+        </div>
+        <div style="padding:1.25rem;">
+          <div class="mb-4">
+            <div class="creation-label">GUEST APPROVAL</div>
+            <div class="d-flex flex-column gap-2 mt-2">
+              <label class="filter-radio-label">
+                <input type="radio" name="guest_approval" value="auto" {{#unless event.guest_approval}}checked{{/unless}}{{#if isAutoApproval}}checked{{/if}} /> Auto-approve all RSVPs
+              </label>
+              <label class="filter-radio-label">
+                <input type="radio" name="guest_approval" value="manual" {{#if isManualApproval}}checked{{/if}} /> Manually approve each RSVP request
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="col-lg-4">
+      <div style="position:sticky; top:72px;">
+
+        <!-- Live Preview -->
+        <div class="cuff-section mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="cuff-section-title mb-0" style="border-bottom:none; padding-bottom:0;">LIVE PREVIEW</div>
+            <span style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--cuff-gray-light); font-style:italic;">(what others see)</span>
+          </div>
+          <hr style="border-color:var(--cuff-border); margin-bottom:0.75rem;" />
+
+          <div style="padding:0.75rem; border:1px solid var(--cuff-border); background:var(--cuff-white);">
+            <div style="font-family:'Space Mono',monospace; font-size:0.82rem; font-weight:700; margin-bottom:6px;" id="preview-name">
+              {{event.event_name}}
+            </div>
+            <div style="font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--cuff-muted); display:flex; flex-direction:column; gap:3px;">
+              <div id="preview-date">{{formDate}} at {{formTime}}</div>
+              <div id="preview-fee">{{event.event_cost}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save -->
+        <div class="cuff-section mb-3">
+          <div class="cuff-section-title">SAVE CHANGES</div>
+          <div class="d-flex flex-column gap-2">
+            <button type="submit" class="btn-cuff-action" style="font-size:0.75rem;">
+              [ SAVE CHANGES ]
+            </button>
+            <a href="/events/{{event.event_id}}" class="btn-cuff-outline" style="font-size:0.72rem; text-align:center; text-decoration:none; display:block; padding:0.35rem 0.9rem;">
+              [ DISCARD & GO BACK ]
+            </a>
+          </div>
+        </div>
+
+        <!-- Cancel Event (Danger Zone) -->
+        <div class="cuff-section">
+          <div class="cuff-section-title" style="color:#991b1b;">DANGER ZONE</div>
+          <p style="font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--cuff-muted); margin-bottom:0.75rem;">
+            Cancelling this event will notify all guests and remove it from the home feed. This cannot be undone.
+          </p>
+          <button type="button" class="btn-cuff-outline" id="cancel-event-btn"
+                  style="font-size:0.72rem; border-color:#991b1b; color:#991b1b; width:100%;"
+                  onclick="confirmCancel()">
+            [ CANCEL EVENT ]
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  </form>
+
+  <!-- Hidden form for cancel action -->
+  <form method="POST" action="/events/{{event.event_id}}/cancel" id="cancel-form" style="display:none;"></form>
+</div>
+
+<style>
+  .creation-step {
+    border: 1px solid var(--cuff-border);
+    background: var(--cuff-white);
+  }
+
+  .step-header {
+    background: var(--cuff-surface);
+    border-bottom: 1px solid var(--cuff-border);
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .step-number {
+    width: 24px;
+    height: 24px;
+    background: var(--cuff-navy);
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cuff-text);
+  }
+
+  .creation-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cuff-gray-dark);
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .event-type-option {
+    border: 2px solid var(--cuff-border);
+    background: var(--cuff-white);
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    transition: all 0.15s;
+    width: 100%;
+  }
+
+  .event-type-option.selected {
+    background: var(--cuff-navy);
+    border-color: var(--cuff-navy);
+    color: #fff;
+  }
+
+  .event-type-option.selected div {
+    color: #fff !important;
+  }
+
+  .filter-radio-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--cuff-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .filter-radio-label input {
+    accent-color: var(--cuff-navy);
+  }
+</style>
+
+<script>
+  // Sync datetime on page load
+  function syncDatetime() {
+    var date = document.querySelector('[name=event_date]')?.value;
+    var time = document.querySelector('[name=start_time]')?.value;
+    if (date && time) {
+      document.getElementById('event_time_combined').value = date + 'T' + time;
+      document.getElementById('preview-date').textContent = date + ' at ' + time;
+    }
+  }
+
+  function updatePreview(field, val) {
+    var map = { name: 'preview-name', fee: 'preview-fee' };
+    var defaults = { name: '[ Event Name ]', fee: '[ Entry Fee ]' };
+    var el = document.getElementById(map[field]);
+    if (el) el.textContent = val || defaults[field];
+  }
+
+  function updateCharCount(el) {
+    document.getElementById('char-count').textContent = el.value.length;
+  }
+
+  function updateChecklist() {}
+
+  function selectType(type, el) {
+    document.getElementById('type-public').classList.remove('selected');
+    document.getElementById('type-private').classList.remove('selected');
+    el.classList.add('selected');
+    el.querySelector('input[type=radio]').checked = true;
+  }
+
+  function confirmCancel() {
+    if (confirm('Are you sure you want to cancel this event? All guests will be notified. This cannot be undone.')) {
+      document.getElementById('cancel-form').submit();
+    }
+  }
+
+  // Init: sync datetime and char count on load
+  document.addEventListener('DOMContentLoaded', function() {
+    syncDatetime();
+    var textarea = document.querySelector('[name=event_details]');
+    if (textarea) document.getElementById('char-count').textContent = textarea.value.length;
+  });
+</script>

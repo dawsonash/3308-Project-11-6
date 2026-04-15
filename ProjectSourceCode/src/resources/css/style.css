@@ -639,3 +639,29 @@ h1, h2, h3, h4 {
         font-size: 1rem;
     }
 }
+
+/* ── FILTER TAGS ── */
+.filter-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 6px 14px;
+    border: 2px solid var(--cuff-border);
+    background: var(--cuff-white);
+    color: var(--cuff-text);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.filter-tag:hover {
+    border-color: var(--cuff-navy);
+    color: var(--cuff-navy);
+}
+
+.filter-tag.active {
+    background: var(--cuff-navy);
+    border-color: var(--cuff-navy);
+    color: #fff;
+}

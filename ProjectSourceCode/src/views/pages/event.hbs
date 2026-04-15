@@ -71,7 +71,7 @@
         <div class="cuff-section-title">LOCATION</div>
         <div class="d-flex align-items-center gap-2">
           <i
-            class="bi bi-lock"
+            class="bi bi-geo-alt"
             style="font-size:1rem; color:var(--cuff-gray-mid);"
           ></i>
           <div>
@@ -88,29 +88,10 @@
             <div
               style="font-size:0.7rem; color:var(--cuff-muted); margin-top:2px;"
             >
-              <i class="bi bi-info-circle" style="font-size:0.65rem;"></i>
+              <i class="bi bi-lock" style="font-size:0.65rem;"></i>
               Full address shared after RSVP
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="cuff-section mb-4">
-        <div class="cuff-section-title">PARKING</div>
-        <div class="d-flex align-items-center gap-2">
-          <i
-            class="bi bi-p-circle"
-            style="font-size:1rem; color:var(--cuff-gray-mid);"
-          ></i>
-          {{#if event.parking_info}}
-            <span style="font-size:0.8rem; color:var(--cuff-text);">
-              {{event.parking_info}}
-            </span>
-          {{else}}
-            <span style="font-size:0.8rem; color:var(--cuff-muted);">
-              No parking info provided.
-            </span>
-          {{/if}}
         </div>
       </div>
 
@@ -140,8 +121,16 @@
                     {{host.first_name}}
                     {{host.last_name}}
                   </div>
+                  <div style="font-size:0.7rem; color:var(--cuff-muted); margin-top:2px;">
+                    {{#if avgHostRating}}
+                      <i class="bi bi-star-fill" style="font-size:0.6rem; color:var(--cuff-navy);"></i>
+                      {{avgHostRating}} rating
+                    {{else}}
+                      No ratings yet
+                    {{/if}}
+                  </div>
                   <div
-                    style="font-size:0.7rem; color:var(--cuff-muted); margin-top:2px;"
+                    style="font-size:0.65rem; color:var(--cuff-muted); margin-top:2px;"
                   >
                     View profile &rarr;
                   </div>
@@ -156,38 +145,180 @@
         {{/if}}
       </div>
 
-      <div class="row g-3 mb-4">
-        <div class="col-6">
-          <div class="stat-box">
-            <div class="stat-value">
-              {{#if avgHostRating}}
-                <span class="rating-display">{{avgHostRating}}</span>
-              {{else}}
-                --
-              {{/if}}
-            </div>
-            <div class="stat-label">HOST RATING</div>
-          </div>
+      {{#if isHost}}
+      <div class="cuff-section mb-4">
+        <div class="cuff-section-title">HOST CONTROLS</div>
+        <div class="d-flex flex-column gap-2">
+          <a href="/events/{{event.event_id}}/edit" class="btn-cuff-action" style="font-size:0.75rem; text-align:center; text-decoration:none; display:block;">
+            [ EDIT EVENT ]
+          </a>
+          {{#unless isCancelled}}
+          <form method="POST" action="/events/{{event.event_id}}/cancel" onsubmit="return confirm('Are you sure you want to cancel this event? All guests will be notified.');">
+            <button type="submit" class="btn-cuff-outline" style="font-size:0.72rem; width:100%; border-color:#991b1b; color:#991b1b;">
+              [ CANCEL EVENT ]
+            </button>
+          </form>
+          {{/unless}}
         </div>
-        <div class="col-6">
-          <div class="stat-box">
-            <div class="stat-value">{{hostReviewCount}}</div>
-            <div class="stat-label">REVIEWS</div>
-          </div>
+        {{#if maxCapacity}}
+        <div style="font-size:0.65rem; color:var(--cuff-muted); margin-top:0.5rem; text-align:center;">
+          {{guestCount}} / {{maxCapacity}} spots filled
         </div>
+        {{/if}}
       </div>
+      {{/if}}
 
-      <div class="cuff-section">
+      <div class="cuff-section mb-4">
         <div class="cuff-section-title">RSVP</div>
-        <button class="btn-cuff-action" id="rsvp-btn" onclick="handleRsvp()">
-          RSVP TO THIS EVENT
-        </button>
+        {{#if isCancelled}}
+          <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700; color:#991b1b; text-align:center; padding:0.75rem; border:1px solid #991b1b;">
+            EVENT CANCELLED
+          </div>
+        {{else if isFull}}
+          <div style="font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700; color:var(--cuff-muted); text-align:center; padding:0.75rem; border:1px solid var(--cuff-border);">
+            EVENT FULL
+          </div>
+        {{else}}
+          <button class="btn-cuff-action" id="rsvp-btn" onclick="handleRsvp()">
+            RSVP TO THIS EVENT
+          </button>
+        {{/if}}
         <div
           style="font-size:0.65rem; color:var(--cuff-muted); margin-top:0.5rem; text-align:center;"
         >
-          {{guestCount}}
-          people are going
+          {{rsvpCount}} people are going
+          {{#if maxCapacity}}
+            (max {{maxCapacity}})
+          {{/if}}
         </div>
+      </div>
+
+      <!--
+        TODO [FRIENDS]: Friends Attending This Event
+        ─────────────────────────────────────────────
+        When friend functionality is built:
+
+        1. Backend (index.js GET /events/:id): After fetching the
+           guests list, cross-reference with the logged-in user's
+           friends. Query example:
+             SELECT u.user_id, u.first_name, u.last_name
+             FROM events_to_guests etg
+             JOIN user_data u ON etg.guest_id = u.user_id
+             JOIN friends f ON f.friend_id = u.user_id
+             WHERE etg.event_id = $1
+               AND f.user_id = $2
+               AND f.status = 'accepted'
+           Pass the result as "friendsAttending" to the template.
+
+        2. Template: Replace the static placeholder avatars below
+           with an #each friendsAttending loop. Show each
+           friend's initials in an avatar-sm, their name as a link
+           to /user/:id, and a count like "2 of your friends are going".
+
+        3. This section should appear ABOVE the full guest list so
+           friends are highlighted first. Keep it hidden if
+           friendsAttending is empty (show a softer message like
+           "Invite friends to this event!" with a share/copy link).
+
+        4. Consider adding an "Invite Friend" button here that sends
+           a notification (type: 'invite') to selected friends.
+      -->
+      <!-- Friends Attending (placeholder) -->
+      <div class="cuff-section mb-4">
+        <div class="cuff-section-title">
+          <i class="bi bi-people-fill" style="font-size:0.7rem;"></i>
+          FRIENDS ATTENDING
+        </div>
+        {{#if sessionUser}}
+          <!-- Replace with #each friendsAttending when friends are implemented -->
+          <div class="d-flex align-items-center gap-2" style="opacity:0.5;">
+            <div style="display:flex;">
+              <div class="avatar-sm" style="background:var(--cuff-gray-dark); width:24px; height:24px; border:2px solid var(--cuff-white);"></div>
+              <div class="avatar-sm" style="background:var(--cuff-gray-mid); width:24px; height:24px; border:2px solid var(--cuff-white); margin-left:-8px;"></div>
+            </div>
+            <span style="font-size:0.7rem; color:var(--cuff-muted);">
+              No friends attending yet.
+            </span>
+          </div>
+        {{else}}
+          <div style="font-size:0.75rem; color:var(--cuff-muted); text-align:center; padding:0.75rem 0;">
+            <a href="/login" style="color:var(--cuff-navy);">Log in</a> to see friends.
+          </div>
+        {{/if}}
+      </div>
+
+      <!--
+        TODO [FRIENDS]: Guest List — friend highlighting
+        ─────────────────────────────────────────────────
+        When friend functionality is built:
+
+        1. Backend (index.js GET /events/:id): Add an "isFriend"
+           boolean to each object in the guests array by checking
+           against the logged-in user's friends list. Example:
+             const friendIds = (await db.any(
+               "SELECT friend_id FROM friends WHERE user_id=$1 AND status='accepted'",
+               [userId]
+             )).map(f => f.friend_id);
+             guests.forEach(g => { g.isFriend = friendIds.includes(g.user_id); });
+
+        2. Template: Sort friends to the top of the list (either in
+           the query with ORDER BY or by passing two arrays:
+           friendGuests and otherGuests). Add a visual indicator
+           next to friend names, e.g. a small "bi-star-fill" icon
+           or a subtle background highlight on their row.
+
+        3. Optionally add a sub-header "FRIENDS" above friend rows
+           and "OTHERS" above non-friend rows to make the grouping
+           clear.
+      -->
+      <!-- Guest List (logged-in only) -->
+      <div class="cuff-section">
+        <div class="cuff-section-title">
+          GUEST LIST
+          <span style="font-weight:400; color:var(--cuff-gray-light); margin-left:4px;">
+            ({{rsvpCount}})
+          </span>
+        </div>
+        {{#if sessionUser}}
+          {{#if guests}}
+            <div class="d-flex flex-column gap-2" style="max-height:280px; overflow-y:auto;">
+              {{#each guests}}
+                <div class="d-flex align-items-center justify-content-between" style="padding:4px 0;">
+                  <a href="/user/{{this.user_id}}" style="text-decoration:none; color:inherit;">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="avatar-sm" style="background:var(--cuff-gray-dark); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.55rem; font-weight:700; width:28px; height:28px;">
+                        {{this.first_name.[0]}}{{this.last_name.[0]}}
+                      </div>
+                      <div style="font-size:0.75rem; font-weight:400;">
+                        {{this.first_name}} {{this.last_name}}
+                      </div>
+                    </div>
+                  </a>
+                  {{#if ../isHost}}
+                    <form method="POST" action="/events/{{../event.event_id}}/remove-guest" style="margin:0;"
+                          onsubmit="return confirm('Remove {{this.first_name}} {{this.last_name}} from this event?');">
+                      <input type="hidden" name="guest_id" value="{{this.user_id}}" />
+                      <button type="submit" style="background:none; border:none; color:#991b1b; cursor:pointer; font-size:0.65rem; font-family:'Space Mono',monospace; padding:2px 6px;">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </form>
+                  {{/if}}
+                </div>
+              {{/each}}
+            </div>
+          {{else}}
+            <div style="font-size:0.75rem; color:var(--cuff-muted); text-align:center; padding:1rem 0;">
+              No guests yet. Be the first to RSVP!
+            </div>
+          {{/if}}
+        {{else}}
+          <div style="text-align:center; padding:1rem 0;">
+            <i class="bi bi-lock" style="font-size:1rem; color:var(--cuff-gray-light);"></i>
+            <p style="font-size:0.75rem; color:var(--cuff-muted); margin:0.5rem 0 0;">
+              <a href="/login" style="color:var(--cuff-navy);">Log in</a> to see who's attending.
+            </p>
+          </div>
+        {{/if}}
       </div>
 
     </div>

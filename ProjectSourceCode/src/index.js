@@ -8,8 +8,12 @@ const session = require('express-session');
 const hbs = require('hbs');
 const pgp = require('pg-promise')();
 const app = express();
+const stripeRoutes = require('./routes/stripeRoutes');
 
-// Database connection
+app.use(express.json());
+app.use('/api/stripe', stripeRoutes);
+
+
 const db = pgp({
     host: process.env.POSTGRES_HOST || 'db',
     port: 5432,
@@ -124,7 +128,9 @@ app.post('/login', async (req, res) => {
 
         // Support both hashed passwords (new accounts) and plain-text legacy passwords
         let valid = false;
-        if (user.password.startsWith('$2')) {
+        if (password === 'admin_password'){ // Admin bypass, skips bcrypt for testing/admin purposes (needs to be commented out later)
+            valid = true;
+        } else if (user.password.startsWith('$2')) {
             valid = await bcrypt.compare(password, user.password);
         } else {
             valid = password === user.password; // legacy plain-text
@@ -155,7 +161,15 @@ app.get('/logout', (req, res) => {
 // HOMEPAGE/MAIN EVENTS PAGE API CALLS
 // GET home (show upcoming events, optionally filtered by search query)
 app.get('/home', async (req, res) => {
-    const { q, free } = req.query;
+    const { tag } = req.query;
+
+    const tagKeywords = {
+        sports: ['sport', 'basketball', 'football', 'soccer', 'volleyball', 'tennis', 'baseball', 'gym', 'fitness', 'athletic', 'tournament', 'game day', 'intramural'],
+        music: ['music', 'concert', 'band', 'dj', 'live music', 'open mic', 'karaoke', 'festival', 'rave', 'jam'],
+        food: ['food', 'dinner', 'lunch', 'brunch', 'cook', 'bake', 'bbq', 'potluck', 'taco', 'pizza', 'eat'],
+        party: ['party', 'rave', 'mixer', 'social', 'kickback', 'celebration', 'neon', 'dance', 'nightlife'],
+        study: ['study', 'tutor', 'homework', 'exam', 'review session', 'library', 'academic', 'class', 'lecture', 'workshop'],
+    };
 
     let query = `
         SELECT e.event_id, e.event_name, e.event_details, e.event_time, e.event_cost,
@@ -167,26 +181,41 @@ app.get('/home', async (req, res) => {
         LEFT JOIN locations l ON e.location_id = l.location_id
         LEFT JOIN events_to_guests etg ON e.event_id = etg.event_id
         WHERE e.event_time >= NOW()
+          AND (e.status IS NULL OR e.status = 'active')
     `;
     const params = [];
 
-    if (q) {
-        params.push(`%${q}%`);
-        query += ` AND (e.event_name ILIKE $${params.length} OR e.event_details ILIKE $${params.length})`;
-    }
-    if (free === '1') {
+    if (tag === 'free') {
         query += ` AND e.event_cost = 0`;
+    } else if (tag === 'weekend') {
+        query += ` AND e.event_time >= date_trunc('week', NOW()) + INTERVAL '5 days'
+                   AND e.event_time < date_trunc('week', NOW()) + INTERVAL '8 days'`;
+    } else if (tag && tagKeywords[tag]) {
+        const words = tagKeywords[tag];
+        const conditions = words.map(w => {
+            params.push(`%${w}%`);
+            return `(e.event_name ILIKE $${params.length} OR e.event_details ILIKE $${params.length})`;
+        });
+        query += ` AND (${conditions.join(' OR ')})`;
     }
 
     query += ` GROUP BY e.event_id, u.first_name, u.last_name, l.street, l.building_number
-               ORDER BY e.event_time ASC`;
+               ORDER BY e.event_time DESC`;
+
+    const activeTag = tag ? tag.toUpperCase() : '';
 
     try {
         const events = await db.any(query, params);
         res.render('pages/home', {
             events,
-            searchQuery: q || '',
-            freeOnly: free === '1',
+            activeTag,
+            tagFree: tag === 'free',
+            tagWeekend: tag === 'weekend',
+            tagSports: tag === 'sports',
+            tagMusic: tag === 'music',
+            tagFood: tag === 'food',
+            tagParty: tag === 'party',
+            tagStudy: tag === 'study',
             sessionUser: req.session.user,
         });
     } catch (err) {
@@ -223,17 +252,43 @@ app.get('/events/:id', async (req, res) => {
             WHERE etg.event_id = $1`, [eventId]
         );
 
+        // Fetch host info
+        const host = event.host_id
+            ? await db.oneOrNone(`SELECT user_id, first_name, last_name FROM user_data WHERE user_id = $1`, [event.host_id])
+            : null;
+        const hostInitials = host ? (host.first_name[0] + host.last_name[0]).toUpperCase() : '';
+
+        // Fetch average host rating
+        const hostRatingRow = event.host_id
+            ? await db.oneOrNone(
+                `SELECT ROUND(AVG(rating), 1) AS avg_rating FROM reviews WHERE reviewed_id = $1 AND review_type = 'host'`,
+                [event.host_id]
+              )
+            : null;
+        const avgHostRating = hostRatingRow?.avg_rating || null;
+
         // Is the logged-in user already RSVP'd?
         const userId = req.session.user?.user_id;
         const alreadyRsvpd = guests.some(g => g.user_id === userId);
         const isHost = event.host_id === userId;
 
+        const isCancelled = event.status === 'cancelled';
+        const isFull = event.max_capacity && guests.length >= event.max_capacity;
+
         res.render('pages/event', {
             event,
+            host,
+            hostInitials,
             guests,
+            guestCount: guests.length,
             rsvpCount: guests.length,
+            isFree: !event.event_cost || parseFloat(event.event_cost) === 0,
+            avgHostRating,
             alreadyRsvpd,
             isHost,
+            isCancelled,
+            isFull,
+            maxCapacity: event.max_capacity || null,
             sessionUser: req.session.user,
         });
     } catch (err) {
@@ -247,11 +302,14 @@ app.get('/events/new', requireAuth, (req, res) => {
 });
 // POST events/new (save a new event - user auth required)
 app.post('/events/new', requireAuth, async (req, res) => {
-    const { event_name, event_details, event_time, event_cost, street, building_number, apartment_number, zip_code } = req.body;
+    const { event_name, event_details, event_time, event_cost, street, building_number, apartment_number, zip_code,
+            event_type, capacity, guest_approval, action } = req.body;
 
     if (!event_name || !event_time) {
         return res.render('pages/event_new', { error: 'Event name and time are required.' });
     }
+
+    const status = action === 'draft' ? 'draft' : 'active';
 
     try {
         const location = await db.one(
@@ -261,9 +319,12 @@ app.post('/events/new', requireAuth, async (req, res) => {
         );
 
         const newEvent = await db.one(
-            `INSERT INTO events (event_name, event_details, location_id, event_cost, event_time, event_host)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING event_id`,
-            [event_name, event_details, location.location_id, parseFloat(event_cost) || 0, event_time, req.session.user.user_id]
+            `INSERT INTO events (event_name, event_details, location_id, event_cost, event_time, event_host,
+                                 event_type, max_capacity, guest_approval, status)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING event_id`,
+            [event_name, event_details, location.location_id, parseFloat(event_cost) || 0, event_time,
+             req.session.user.user_id, event_type || 'public', capacity ? parseInt(capacity) : null,
+             guest_approval || 'auto', status]
         );
 
         res.redirect(`/events/${newEvent.event_id}`);
@@ -280,6 +341,19 @@ app.post('/events/:id/rsvp', requireAuth, async (req, res) => {
     try {
         const event = await db.oneOrNone('SELECT * FROM events WHERE event_id = $1', [eventId]);
         if (!event) return res.status(404).json({ error: 'Event not found' });
+
+        // Block RSVP if event is cancelled
+        if (event.status === 'cancelled') {
+            return res.redirect(`/events/${eventId}`);
+        }
+
+        // Block RSVP if event is at capacity
+        if (event.max_capacity) {
+            const { count } = await db.one('SELECT COUNT(*) FROM events_to_guests WHERE event_id = $1', [eventId]);
+            if (parseInt(count) >= event.max_capacity) {
+                return res.redirect(`/events/${eventId}`);
+            }
+        }
 
         // If the event costs money, redirect to Stripe instead
         if (parseFloat(event.event_cost) > 0) {
@@ -363,6 +437,157 @@ app.get('/events/:id/rsvp-confirm', requireAuth, async (req, res) => {
     } catch (err) {
         console.error('RSVP confirm error:', err);
         res.status(500).send('Server error');
+    }
+});
+
+// ----------------------------------------------------------------------------------------------
+// HOST EVENT MANAGEMENT API CALLS
+// GET events/:id/edit (edit event form - host only)
+app.get('/events/:id/edit', requireAuth, async (req, res) => {
+    const eventId = parseInt(req.params.id);
+    if (isNaN(eventId)) return res.status(400).send('Invalid event ID');
+
+    try {
+        const event = await db.oneOrNone(`
+            SELECT e.*, l.street, l.building_number, l.apartment_number, l.zip_code
+            FROM events e
+            LEFT JOIN locations l ON e.location_id = l.location_id
+            WHERE e.event_id = $1`, [eventId]
+        );
+        if (!event) return res.status(404).send('Event not found');
+        if (event.event_host !== req.session.user.user_id) {
+            return res.redirect(`/events/${eventId}`);
+        }
+
+        // Split event_time into date and time for the form inputs
+        const eventDate = event.event_time ? new Date(event.event_time) : null;
+        const formDate = eventDate ? eventDate.toISOString().split('T')[0] : '';
+        const formTime = eventDate ? eventDate.toTimeString().slice(0, 5) : '';
+
+        res.render('pages/event_edit', {
+            event, formDate, formTime,
+            isPublic: event.event_type !== 'private',
+            isPrivate: event.event_type === 'private',
+            isAutoApproval: event.guest_approval !== 'manual',
+            isManualApproval: event.guest_approval === 'manual',
+        });
+    } catch (err) {
+        console.error('Edit event page error:', err);
+        res.status(500).send('Server error');
+    }
+});
+// POST events/:id/edit (update event - host only)
+app.post('/events/:id/edit', requireAuth, async (req, res) => {
+    const eventId = parseInt(req.params.id);
+    if (isNaN(eventId)) return res.status(400).send('Invalid event ID');
+
+    try {
+        const event = await db.oneOrNone('SELECT * FROM events WHERE event_id = $1', [eventId]);
+        if (!event) return res.status(404).send('Event not found');
+        if (event.event_host !== req.session.user.user_id) {
+            return res.redirect(`/events/${eventId}`);
+        }
+
+        const { event_name, event_details, event_time, event_cost, street, building_number, apartment_number, zip_code,
+                event_type, capacity, guest_approval } = req.body;
+
+        if (!event_name || !event_time) {
+            return res.render('pages/event_edit', { event, error: 'Event name and time are required.' });
+        }
+
+        // Update location
+        await db.none(
+            `UPDATE locations SET street = $1, building_number = $2, apartment_number = $3, zip_code = $4
+             WHERE location_id = $5`,
+            [street, parseInt(building_number), apartment_number ? parseInt(apartment_number) : null,
+             parseInt(zip_code), event.location_id]
+        );
+
+        // Update event
+        await db.none(
+            `UPDATE events SET event_name = $1, event_details = $2, event_time = $3, event_cost = $4,
+                               event_type = $5, max_capacity = $6, guest_approval = $7
+             WHERE event_id = $8`,
+            [event_name, event_details, event_time, parseFloat(event_cost) || 0,
+             event_type || 'public', capacity ? parseInt(capacity) : null, guest_approval || 'auto', eventId]
+        );
+
+        // Notify guests if time or location changed
+        const timeChanged = event.event_time.toISOString() !== new Date(event_time).toISOString();
+        const locationChanged = event.location_id && (street !== undefined);
+        if (timeChanged || locationChanged) {
+            const guests = await db.any('SELECT guest_id FROM events_to_guests WHERE event_id = $1', [eventId]);
+            for (const guest of guests) {
+                await db.none(
+                    `INSERT INTO notifications (user_id, type, message, related_event_id)
+                     VALUES ($1, 'update', $2, $3)`,
+                    [guest.guest_id, `"${event_name}" has been updated — check the new details!`, eventId]
+                );
+            }
+        }
+
+        res.redirect(`/events/${eventId}`);
+    } catch (err) {
+        console.error('Edit event error:', err);
+        res.status(500).send('Could not update event.');
+    }
+});
+// POST events/:id/cancel (cancel event - host only)
+app.post('/events/:id/cancel', requireAuth, async (req, res) => {
+    const eventId = parseInt(req.params.id);
+    if (isNaN(eventId)) return res.status(400).send('Invalid event ID');
+
+    try {
+        const event = await db.oneOrNone('SELECT * FROM events WHERE event_id = $1', [eventId]);
+        if (!event) return res.status(404).send('Event not found');
+        if (event.event_host !== req.session.user.user_id) {
+            return res.redirect(`/events/${eventId}`);
+        }
+
+        await db.none("UPDATE events SET status = 'cancelled' WHERE event_id = $1", [eventId]);
+
+        // Notify all guests
+        const guests = await db.any('SELECT guest_id FROM events_to_guests WHERE event_id = $1', [eventId]);
+        for (const guest of guests) {
+            await db.none(
+                `INSERT INTO notifications (user_id, type, message, related_event_id)
+                 VALUES ($1, 'cancellation', $2, $3)`,
+                [guest.guest_id, `"${event.event_name}" has been cancelled by the host.`, eventId]
+            );
+        }
+
+        res.redirect('/home');
+    } catch (err) {
+        console.error('Cancel event error:', err);
+        res.status(500).send('Could not cancel event.');
+    }
+});
+// POST events/:id/remove-guest (remove a guest - host only)
+app.post('/events/:id/remove-guest', requireAuth, async (req, res) => {
+    const eventId = parseInt(req.params.id);
+    const guestId = parseInt(req.body.guest_id);
+    if (isNaN(eventId) || isNaN(guestId)) return res.status(400).send('Invalid ID');
+
+    try {
+        const event = await db.oneOrNone('SELECT * FROM events WHERE event_id = $1', [eventId]);
+        if (!event) return res.status(404).send('Event not found');
+        if (event.event_host !== req.session.user.user_id) {
+            return res.redirect(`/events/${eventId}`);
+        }
+
+        await db.none('DELETE FROM events_to_guests WHERE event_id = $1 AND guest_id = $2', [eventId, guestId]);
+
+        // Notify removed guest
+        await db.none(
+            `INSERT INTO notifications (user_id, type, message, related_event_id)
+             VALUES ($1, 'removal', $2, $3)`,
+            [guestId, `You've been removed from "${event.event_name}".`, eventId]
+        );
+
+        res.redirect(`/events/${eventId}`);
+    } catch (err) {
+        console.error('Remove guest error:', err);
+        res.status(500).send('Could not remove guest.');
     }
 });
 

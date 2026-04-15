@@ -1,0 +1,318 @@
+{{!< main}}
+<div class="container" style="max-width:900px; padding-top:2rem; padding-bottom:5rem;">
+
+  <!-- Page Title -->
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <div class="page-title-bar"></div>
+    <h1 class="page-title mb-0">SIGN-UP PAGE</h1>
+  </div>
+  <hr style="border-color:var(--cuff-border); margin-bottom:2rem;" />
+
+  <!-- ── STEP 1: REGISTRATION FORM ── -->
+  <div class="cuff-section" style="padding:0; margin-bottom:1.5rem;">
+
+    <!-- Card Header -->
+    <div style="background:var(--cuff-surface); border-bottom:1px solid var(--cuff-border); padding:0.6rem 1rem;">
+      <span style="font-family:'Space Mono',monospace; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--cuff-gray-mid);">REGISTRATION FORM</span>
+    </div>
+
+    <div style="padding:1.5rem 2rem 2rem;">
+
+      <!-- CU Boulder notice banner -->
+      <div style="border:2px dashed var(--cuff-border); padding:0.75rem 1rem; margin-bottom:1.75rem; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1rem; flex-shrink:0;">⚠️</span>
+        <span style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--cuff-text); line-height:1.5;">
+          <strong>CU Boulder students only.</strong> Must use a @colorado.edu email address to register.
+        </span>
+      </div>
+
+      <!-- Error message -->
+      {{#if error}}
+        <div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; font-family:'Space Mono',monospace; font-size:0.72rem; padding:0.65rem 0.9rem; margin-bottom:1.25rem;">
+          {{error}}
+        </div>
+      {{/if}}
+
+      <form method="POST" action="/register" enctype="multipart/form-data">
+
+        <!-- Profile Photo -->
+        <div class="mb-4">
+          <label style="font-family:'Space Mono',monospace; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--cuff-gray-dark); display:block; margin-bottom:0.6rem;">
+            PROFILE PHOTO
+          </label>
+          <div class="d-flex align-items-center gap-3">
+            <div id="photo-preview" style="width:72px; height:72px; border:1px solid var(--cuff-border); background:var(--cuff-surface); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; overflow:hidden;">
+              <div id="photo-placeholder" style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%;">
+                <div style="width:30px; height:30px; border:1px solid var(--cuff-gray-border); position:relative;">
+                  <div style="position:absolute; top:0; left:0; right:0; bottom:0; overflow:hidden;">
+                    <div style="position:absolute; top:50%; left:0; width:100%; height:1px; background:var(--cuff-gray-border); transform:rotate(35deg); transform-origin:center;"></div>
+                    <div style="position:absolute; top:50%; left:0; width:100%; height:1px; background:var(--cuff-gray-border); transform:rotate(-35deg); transform-origin:center;"></div>
+                  </div>
+                </div>
+                <span style="font-family:'Space Mono',monospace; font-size:0.55rem; color:var(--cuff-gray-light); margin-top:4px;">[PHOTO]</span>
+              </div>
+              <img id="photo-img" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover;" />
+            </div>
+            <div>
+              <button
+                type="button"
+                class="btn-cuff-outline"
+                style="font-size:0.72rem; margin-bottom:0.4rem;"
+                onclick="document.getElementById('profile_photo_input').click()"
+              >
+                [ UPLOAD PHOTO ]
+              </button>
+              <input
+                type="file"
+                id="profile_photo_input"
+                name="profile_photo"
+                accept="image/*"
+                style="display:none;"
+                onchange="previewPhoto(this)"
+              />
+              <div style="font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--cuff-gray-light); font-style:italic;">
+                Optional — can add later in account settings
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- First Name + Last Name -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="reg-label">FIRST NAME</label>
+            <input class="cuff-input" type="text" name="first_name" placeholder="e.g. Alex" required />
+          </div>
+          <div class="col-md-6">
+            <label class="reg-label">LAST NAME</label>
+            <input class="cuff-input" type="text" name="last_name" placeholder="e.g. Johnson" required />
+          </div>
+        </div>
+
+        <!-- CU Boulder Email -->
+        <div class="mb-3">
+          <label class="reg-label">CU BOULDER EMAIL</label>
+          <input
+            class="cuff-input"
+            type="email"
+            name="email"
+            id="email-input"
+            placeholder="yourname@colorado.edu"
+            required
+            oninput="validateCUEmail(this)"
+          />
+          <div id="email-error" style="font-family:'Space Mono',monospace; font-size:0.68rem; color:#991b1b; margin-top:4px; display:none;">
+            Must be a @colorado.edu email address.
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="mb-3">
+          <label class="reg-label">USERNAME</label>
+          <input class="cuff-input" type="text" name="username" placeholder="Choose a unique handle..." />
+        </div>
+
+        <!-- Class Year -->
+        <div class="mb-3">
+          <label class="reg-label">CLASS YEAR</label>
+          <select class="cuff-input" name="class_year" style="appearance:auto; cursor:pointer;">
+            <option value="" disabled selected>Select your year...</option>
+            <option value="freshman">Freshman</option>
+            <option value="sophomore">Sophomore</option>
+            <option value="junior">Junior</option>
+            <option value="senior">Senior</option>
+            <option value="grad">Grad</option>
+          </select>
+          <div style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--cuff-gray-light); margin-top:4px; font-style:italic;">
+            [ Options: Freshman, Sophomore, Junior, Senior, Grad ]
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          <label class="reg-label">PASSWORD</label>
+          <input
+            class="cuff-input"
+            type="password"
+            name="password"
+            id="password-input"
+            placeholder="Min 8 characters..."
+            minlength="8"
+            required
+            oninput="checkPasswordMatch()"
+          />
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-4">
+          <label class="reg-label">CONFIRM PASSWORD</label>
+          <input
+            class="cuff-input"
+            type="password"
+            name="confirm_password"
+            id="confirm-input"
+            placeholder="Re-enter password..."
+            required
+            oninput="checkPasswordMatch()"
+          />
+          <div id="pw-match-msg" style="font-family:'Space Mono',monospace; font-size:0.68rem; margin-top:4px; display:none;"></div>
+        </div>
+
+        <!-- Terms checkboxes -->
+        <div style="border:1px solid var(--cuff-border); padding:0.85rem 1rem; margin-bottom:1.25rem; display:flex; flex-direction:column; gap:0.6rem;">
+          <label style="font-family:'Space Mono',monospace; font-size:0.73rem; color:var(--cuff-text); display:flex; align-items:center; gap:10px; cursor:pointer;">
+            <input type="checkbox" name="agree_terms" required style="accent-color:var(--cuff-navy); width:14px; height:14px; flex-shrink:0;" />
+            [ I agree to the Terms of Service and Community Guidelines for CU Party Finder ]
+          </label>
+          <label style="font-family:'Space Mono',monospace; font-size:0.73rem; color:var(--cuff-text); display:flex; align-items:center; gap:10px; cursor:pointer;">
+            <input type="checkbox" name="agree_age" required style="accent-color:var(--cuff-navy); width:14px; height:14px; flex-shrink:0;" />
+            [ I am 18 years of age or older ]
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          style="width:100%; font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700; color:#fff; background:var(--cuff-navy); border:2px solid var(--cuff-navy); padding:0.75rem 1rem; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:background 0.15s;"
+          onmouseover="this.style.background='var(--cuff-navy-light)'"
+          onmouseout="this.style.background='var(--cuff-navy)'"
+        >
+          [ CREATE ACCOUNT → ]
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ── STEP 2: EMAIL VERIFICATION (shown after submit) ── -->
+  <div class="cuff-section" style="padding:0;">
+    <div style="background:var(--cuff-surface); border-bottom:1px solid var(--cuff-border); padding:0.6rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-family:'Space Mono',monospace; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--cuff-gray-mid);">STEP 2: EMAIL VERIFICATION</span>
+      <span style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--cuff-gray-light); font-style:italic;">(After form submission)</span>
+    </div>
+
+    <div style="padding:1.5rem 2rem 2rem;">
+      <div style="border:2px dashed var(--cuff-border); padding:2rem 1.5rem; display:flex; flex-direction:column; align-items:center; text-align:center;">
+
+        <!-- Email icon -->
+        <div style="width:48px; height:36px; border:2px solid var(--cuff-gray-border); position:relative; margin-bottom:1rem; background:var(--cuff-surface);">
+          <div style="position:absolute; top:0; left:0; right:0; bottom:0; overflow:hidden;">
+            <div style="position:absolute; top:50%; left:0; width:100%; height:1.5px; background:var(--cuff-gray-border); transform:rotate(25deg); transform-origin:left center;"></div>
+            <div style="position:absolute; top:50%; right:0; width:100%; height:1.5px; background:var(--cuff-gray-border); transform:rotate(-25deg); transform-origin:right center;"></div>
+          </div>
+        </div>
+
+        <p style="font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--cuff-muted); max-width:480px; line-height:1.7; margin-bottom:1.5rem;">
+          [ A 6-digit verification code will be sent to your @colorado.edu email. Enter it below to confirm your account. ]
+        </p>
+
+        <!-- 6-digit code inputs -->
+        <div style="display:flex; gap:8px; margin-bottom:1.25rem;" id="code-inputs">
+          <input type="text" maxlength="1" class="code-box" oninput="moveNext(this, 0)" />
+          <input type="text" maxlength="1" class="code-box" oninput="moveNext(this, 1)" />
+          <input type="text" maxlength="1" class="code-box" oninput="moveNext(this, 2)" />
+          <input type="text" maxlength="1" class="code-box" oninput="moveNext(this, 3)" />
+          <input type="text" maxlength="1" class="code-box" oninput="moveNext(this, 4)" />
+          <input type="text" maxlength="1" class="code-box" />
+        </div>
+
+        <button
+          type="button"
+          style="font-family:'Space Mono',monospace; font-size:0.78rem; font-weight:700; color:#fff; background:var(--cuff-navy); border:2px solid var(--cuff-navy); padding:0.6rem 1.75rem; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;"
+        >
+          [ VERIFY EMAIL ]
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Log in link -->
+  <p style="font-family:'Space Mono',monospace; font-size:0.75rem; text-align:center; margin-top:1.5rem; color:var(--cuff-muted);">
+    Already have an account?
+    <a href="/login" style="color:var(--cuff-navy); font-weight:700; text-decoration:underline;">Log In</a>
+  </p>
+
+</div>
+
+<style>
+  .reg-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cuff-gray-dark);
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .code-box {
+    width: 44px;
+    height: 52px;
+    border: 1px solid var(--cuff-border);
+    background: var(--cuff-white);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--cuff-text);
+    border-radius: 0;
+    transition: border-color 0.15s;
+  }
+
+  .code-box:focus {
+    outline: none;
+    border-color: var(--cuff-navy);
+  }
+</style>
+
+<script>
+  function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('photo-placeholder').style.display = 'none';
+        const img = document.getElementById('photo-img');
+        img.src = e.target.result;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function validateCUEmail(input) {
+    const errEl = document.getElementById('email-error');
+    if (input.value && !input.value.endsWith('@colorado.edu')) {
+      errEl.style.display = 'block';
+      input.style.borderColor = '#fca5a5';
+    } else {
+      errEl.style.display = 'none';
+      input.style.borderColor = '';
+    }
+  }
+
+  function checkPasswordMatch() {
+    const pw  = document.getElementById('password-input').value;
+    const cpw = document.getElementById('confirm-input').value;
+    const msg = document.getElementById('pw-match-msg');
+    if (!cpw) { msg.style.display = 'none'; return; }
+    if (pw === cpw) {
+      msg.style.display = 'block';
+      msg.style.color = '#065f46';
+      msg.textContent = '✓ Passwords match';
+    } else {
+      msg.style.display = 'block';
+      msg.style.color = '#991b1b';
+      msg.textContent = '✗ Passwords do not match';
+    }
+  }
+
+  function moveNext(input, index) {
+    const boxes = document.querySelectorAll('.code-box');
+    if (input.value.length === 1 && index < boxes.length - 1) {
+      boxes[index + 1].focus();
+    }
+  }
+</script>
