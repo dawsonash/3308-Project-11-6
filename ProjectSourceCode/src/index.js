@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -9,6 +11,31 @@ const hbs = require('hbs');
 const pgp = require('pg-promise')();
 const app = express();
 const stripeRoutes = require('./routes/stripeRoutes');
+
+// Multer configuration for event cover photo uploads
+const uploadsDir = path.join(__dirname, 'resources', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        const ext = path.extname(file.originalname).toLowerCase();
+        cb(null, `event-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`);
+    }
+});
+
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        cb(null, allowed.includes(file.mimetype));
+    },
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 app.use(express.json());
 app.use('/api/stripe', stripeRoutes);
@@ -200,7 +227,7 @@ app.get('/home', async (req, res) => {
     };
 
     let query = `
-        SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost,
+        SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost, e.cover_photo,
                u.first_name || ' ' || u.last_name AS host_name,
                l.street || ' ' || l.building_number AS location_text,
                COUNT(etg.guest_id) AS rsvp_count
@@ -227,7 +254,7 @@ app.get('/home', async (req, res) => {
         query += ` AND (${conditions.join(' OR ')})`;
     }
 
-    query += ` GROUP BY e.event_id, u.first_name, u.last_name, l.street, l.building_number
+    query += ` GROUP BY e.event_id, e.cover_photo, u.first_name, u.last_name, l.street, l.building_number
                ORDER BY e.event_start_time DESC`;
 
     const activeTag = tag ? tag.toUpperCase() : '';
@@ -260,9 +287,10 @@ app.get('/events/new', requireAuth, (req, res) => {
     res.render('pages/event_new');
 });
 // POST events/new (save a new event - user auth required)
-app.post('/events/new', requireAuth, async (req, res) => {
+app.post('/events/new', requireAuth, upload.single('cover_photo'), async (req, res) => {
     const { event_name, event_details, event_start_time, event_end_time, event_cost, street, building_number, apartment_number, zip_code,
             event_type, capacity, guest_approval, action } = req.body;
+    const coverPhoto = req.file ? req.file.filename : null;
 
     if (!event_name || !event_start_time) {
         return res.render('pages/event_new', { error: 'Event name and time are required.' });
@@ -274,16 +302,16 @@ app.post('/events/new', requireAuth, async (req, res) => {
         const location = await db.one(
             `INSERT INTO locations (street, building_number, apartment_number, zip_code)
              VALUES ($1, $2, $3, $4) RETURNING location_id`,
-            [street, parseInt(building_number), apartment_number ? parseInt(apartment_number) : null, parseInt(zip_code)]
+            [street, building_number ? parseInt(building_number) : null, apartment_number ? parseInt(apartment_number) : null, parseInt(zip_code)]
         );
 
         const newEvent = await db.one(
             `INSERT INTO events (event_name, event_details, location_id, event_cost, event_start_time, event_end_time, event_host,
-                                 event_type, max_capacity, guest_approval, status)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING event_id`,
+                                 event_type, max_capacity, guest_approval, status, cover_photo)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING event_id`,
             [event_name, event_details, location.location_id, parseFloat(event_cost) || 0, event_start_time,
              event_end_time || null, req.session.user.user_id, event_type || 'public', capacity ? parseInt(capacity) : null,
-             guest_approval || 'auto', status]
+             guest_approval || 'auto', status, coverPhoto]
         );
 
         res.redirect(`/events/${newEvent.event_id}`);
@@ -509,7 +537,7 @@ app.get('/events/:id/edit', requireAuth, async (req, res) => {
     }
 });
 // POST events/:id/edit (update event - host only)
-app.post('/events/:id/edit', requireAuth, async (req, res) => {
+app.post('/events/:id/edit', requireAuth, upload.single('cover_photo'), async (req, res) => {
     const eventId = parseInt(req.params.id);
     if (isNaN(eventId)) return res.status(400).send('Invalid event ID');
 
@@ -527,6 +555,22 @@ app.post('/events/:id/edit', requireAuth, async (req, res) => {
             return res.render('pages/event_edit', { event, error: 'Event name and time are required.' });
         }
 
+        // Determine cover photo value
+        let finalCoverPhoto;
+        if (req.file) {
+            finalCoverPhoto = req.file.filename;
+            if (event.cover_photo) {
+                fs.unlink(path.join(uploadsDir, event.cover_photo), () => {});
+            }
+        } else if (req.body.remove_cover_photo === 'on') {
+            finalCoverPhoto = null;
+            if (event.cover_photo) {
+                fs.unlink(path.join(uploadsDir, event.cover_photo), () => {});
+            }
+        } else {
+            finalCoverPhoto = event.cover_photo;
+        }
+
         // Update location
         await db.none(
             `UPDATE locations SET street = $1, building_number = $2, apartment_number = $3, zip_code = $4
@@ -538,10 +582,10 @@ app.post('/events/:id/edit', requireAuth, async (req, res) => {
         // Update event
         await db.none(
             `UPDATE events SET event_name = $1, event_details = $2, event_start_time = $3, event_end_time = $4, event_cost = $5,
-                               event_type = $6, max_capacity = $7, guest_approval = $8
-             WHERE event_id = $9`,
+                               event_type = $6, max_capacity = $7, guest_approval = $8, cover_photo = $9
+             WHERE event_id = $10`,
             [event_name, event_details, event_start_time, event_end_time || null, parseFloat(event_cost) || 0,
-             event_type || 'public', capacity ? parseInt(capacity) : null, guest_approval || 'auto', eventId]
+             event_type || 'public', capacity ? parseInt(capacity) : null, guest_approval || 'auto', finalCoverPhoto, eventId]
         );
 
         // Notify guests if time or location changed
@@ -659,13 +703,13 @@ app.get('/user/:id', async (req, res) => {
         );
 
         const eventsAttended = await db.any(
-            `SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost
+            `SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost, e.cover_photo
              FROM events e
              JOIN events_to_guests etg ON e.event_id = etg.event_id
              WHERE etg.guest_id = $1 ORDER BY e.event_start_time DESC`, [userId]
         );
         const eventsHosted = await db.any(
-            `SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost
+            `SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost, e.cover_photo
              FROM events e WHERE e.event_host = $1 ORDER BY e.event_start_time DESC`, [userId]
         );
 
@@ -778,7 +822,7 @@ app.get('/search', async (req, res) => {
     const term = `%${q.trim()}%`;
     try {
         const events = await db.any(
-            `SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost,
+            `SELECT e.event_id, e.event_name, e.event_details, e.event_start_time, e.event_end_time, e.event_cost, e.cover_photo,
                     u.first_name || ' ' || u.last_name AS host_name
              FROM events e
              LEFT JOIN user_data u ON e.event_host = u.user_id
@@ -798,6 +842,14 @@ app.get('/search', async (req, res) => {
         console.error('Search error:', err);
         res.render('pages/search', { query: q, events: [], users: [], error: 'Search failed.' });
     }
+});
+
+// Multer error handling
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).render('pages/event_new', { error: 'File too large. Maximum size is 5MB.' });
+    }
+    next(err);
 });
 
 // Start server

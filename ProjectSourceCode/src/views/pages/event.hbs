@@ -10,6 +10,12 @@
   </div>
   <hr class="mb-4" style="border-color:var(--cuff-border);" />
 
+  {{#if event.cover_photo}}
+    <div style="width:100%; height:280px; border:2px solid var(--cuff-border); margin-bottom:1.5rem; overflow:hidden;">
+      <img src="/uploads/{{event.cover_photo}}" alt="{{event.event_name}}" style="width:100%; height:100%; object-fit:cover;" />
+    </div>
+  {{/if}}
+
   <div class="cuff-section mb-4">
     <h2
       style="font-size:1.1rem; margin-bottom:0.5rem;"

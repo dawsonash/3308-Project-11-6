@@ -15,7 +15,7 @@
     </div>
   {{/if}}
 
-  <form method="POST" action="/events/{{event.event_id}}/edit" id="edit-event-form">
+  <form method="POST" action="/events/{{event.event_id}}/edit" id="edit-event-form" enctype="multipart/form-data">
   <div class="row g-4">
 
     <!-- LEFT: FORM STEPS -->
@@ -139,11 +139,40 @@
         </div>
       </div>
 
-      <!-- STEP 3: PRIVACY & GUEST ACCESS -->
+      <!-- STEP 3: EVENT PHOTO -->
       <div class="creation-step mb-4">
         <div class="step-header">
           <span class="step-number">3</span>
-          <span class="step-title">STEP 3: PRIVACY & GUEST ACCESS</span>
+          <span class="step-title">STEP 3: EVENT PHOTO</span>
+        </div>
+        <div style="padding:1.25rem;">
+          {{#if event.cover_photo}}
+            <div style="margin-bottom:1rem;">
+              <div class="creation-label">CURRENT COVER PHOTO</div>
+              <div style="border:1px solid var(--cuff-border); overflow:hidden; max-height:200px;">
+                <img src="/uploads/{{event.cover_photo}}" alt="Current cover photo" style="width:100%; object-fit:cover;" />
+              </div>
+              <label style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--cuff-muted); margin-top:0.5rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" name="remove_cover_photo" /> Remove current photo
+              </label>
+            </div>
+          {{/if}}
+          <div class="creation-label">{{#if event.cover_photo}}REPLACE WITH NEW PHOTO{{else}}UPLOAD COVER PHOTO{{/if}}</div>
+          <input type="file" id="cover-upload" name="cover_photo" accept="image/*" style="display:none;" />
+          <div class="photo-upload-zone" onclick="document.getElementById('cover-upload').click()" style="border:2px dashed var(--cuff-border); padding:2rem 1rem; display:flex; flex-direction:column; align-items:center; cursor:pointer; background:var(--cuff-surface);">
+            <i class="bi bi-camera" style="font-size:1.75rem; color:var(--cuff-gray-mid);"></i>
+            <div style="font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--cuff-gray-light); margin-top:4px;">
+              [ Click to upload · JPG, PNG, GIF, WebP · Max 5MB ]
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: PRIVACY & GUEST ACCESS -->
+      <div class="creation-step mb-4">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <span class="step-title">STEP 4: PRIVACY & GUEST ACCESS</span>
         </div>
         <div style="padding:1.25rem;">
           <div class="mb-4">

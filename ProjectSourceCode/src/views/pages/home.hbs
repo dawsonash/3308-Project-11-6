@@ -28,9 +28,15 @@
             <a href="/events/{{this.event_id}}" style="text-decoration:none; color:inherit;">
               <div class="cuff-card" style="padding:0; overflow:hidden;">
                 <!-- Wide image banner -->
-                <div style="width:100%; height:140px; background:var(--cuff-navy-light); display:flex; align-items:center; justify-content:center; border-bottom:2px solid var(--cuff-border);">
-                  <i class="bi bi-calendar-event" style="font-size:2.5rem; color:var(--cuff-gray-mid); opacity:0.5;"></i>
-                </div>
+                {{#if this.cover_photo}}
+                  <div style="width:100%; height:140px; border-bottom:2px solid var(--cuff-border); overflow:hidden;">
+                    <img src="/uploads/{{this.cover_photo}}" alt="{{this.event_name}}" style="width:100%; height:100%; object-fit:cover;" />
+                  </div>
+                {{else}}
+                  <div style="width:100%; height:140px; background:var(--cuff-navy-light); display:flex; align-items:center; justify-content:center; border-bottom:2px solid var(--cuff-border);">
+                    <i class="bi bi-calendar-event" style="font-size:2.5rem; color:var(--cuff-gray-mid); opacity:0.5;"></i>
+                  </div>
+                {{/if}}
                 <!-- Card body -->
                 <div style="padding:1rem;">
                   <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
@@ -108,11 +114,6 @@
                 </div>
               </div>
             </a>
-            {{#if this.event_cost}}
-              <div class="px-3 pb-3 mt-n2">
-                <button onclick="handleRSVP('{{this.event_id}}', '{{this.event_name}}', {{this.event_cost}})" class="btn-cuff-primary w-100" style="font-size:0.75rem; padding:0.4rem;">RSVP & Pay</button>
-              </div>
-            {{/if}}
           {{/each}}
         </div>
       {{else}}
@@ -229,42 +230,4 @@
 
 </div>
 
-<script>
-  /**
-   * This function MUST be named handleRSVP to match your button's onclick
-   */
-  async function handleRSVP(eventId, eventName, price) {
-    // If price is missing or not a number, default to 0 or handle error
-    const numericPrice = parseFloat(price) || 0;
-
-    console.log("Attempting RSVP for:", { eventId, eventName, numericPrice });
-
-    try {
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({ 
-          eventId: eventId, 
-          eventName: eventName, 
-          price: numericPrice 
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.url) {
-        // Redirect to Stripe
-        window.location.href = data.url;
-      } else {
-        console.error("Stripe Session Error:", data);
-        alert("Payment Error: " + (data.error || "Could not initialize checkout"));
-      }
-    } catch (err) {
-      console.error("Network or Server Error:", err);
-      alert("Critical Error: Please check the console logs.");
-    }
-  }
-</script>
 

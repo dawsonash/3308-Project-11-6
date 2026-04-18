@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 CREATE TABLE IF NOT EXISTS locations (
     location_id SERIAL PRIMARY KEY,
     street VARCHAR(255) NOT NULL,
-    building_number SMALLINT NOT NULL,
+    building_number SMALLINT,
     apartment_number SMALLINT,
     zip_code INT
 ); --Create City/state as needed
@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS events (
     max_capacity INT,
     guest_approval VARCHAR(10) DEFAULT 'auto',
     status VARCHAR(12) DEFAULT 'active',
+    cover_photo VARCHAR(255),
     CONSTRAINT fk_host FOREIGN KEY (event_host) REFERENCES user_data(user_id),
     CONSTRAINT fk_event_location FOREIGN KEY (location_id) REFERENCES locations(location_id)
 );
