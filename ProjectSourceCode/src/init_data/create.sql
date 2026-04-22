@@ -1,9 +1,12 @@
 CREATE TABLE IF NOT EXISTS user_data (
-    user_id SERIAL PRIMARY KEY,
-    first_name VARCHAR(63) NOT NULL,
-    last_name VARCHAR(63) NOT NULL,
-    password VARCHAR(255),
-    email VARCHAR(255) NOT NULL UNIQUE
+    user_id       SERIAL PRIMARY KEY,
+    first_name    VARCHAR(63)  NOT NULL,
+    last_name     VARCHAR(63)  NOT NULL,
+    password      VARCHAR(255),
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    username      VARCHAR(63)  UNIQUE,
+    class_year    VARCHAR(16)  CHECK (class_year IN ('freshman','sophomore','junior','senior','grad')),
+    profile_photo VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS reviews (
