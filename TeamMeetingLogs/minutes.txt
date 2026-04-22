@@ -1,3 +1,6 @@
 3/31/26 meeting: was rescheduled 
 4/1/26 meeting:
 Today we discussed this last week. Sawyer created the SQL Database. Dawson was creating The Event Details Page. Ryan was creating the event creation page. Aberham was creating the notification system. Ayub was working on setting up the docker compose and working on the payment aspect. 
+4/7/26 meeting: rescheduled 
+4/8/26 meeting: Sawyer did lab. Dawson and ryan worked on creating all our webpages. Ayub set up Stripe for payment. Aberham Created notification system.
+4/14/26 meeting: Sawyer Started unit testing. Dawson finished webpaged. Ryan and aberham Created the backend API calls. Ayub stared setting up immage hosting. 
