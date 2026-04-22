@@ -5,8 +5,8 @@
     as RSVP/sign up for other student’s events. Once you have created an account you'll be able to create
     and view events as well as provide feedbacks and ratings to hosts and guests of previous events you've
     attended or hosted. When you create an event this can be marked as public (available to all CU Boulder
-    students who have signed up for our service) or private (which require attendees to RSVP and be accepted
-    to the event). You can see all currently publicly available events on the homepage.
+    students who have signed up for our service) or private (which require attendees to RSVP and be 
+    accepted to the event). You can see all currently publicly available events on the homepage.
 
 # Contributors:
     Ryan Renemans (ryre3851, ryre3851@colorado.edu),
