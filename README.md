@@ -43,4 +43,4 @@
     5. Run the tests by typing "npm test"
     
 # Link to CUFF: 
-    [CUFF](https://function-finder.onrender.com/home)
+[CUFF](https://function-finder.onrender.com/home)
