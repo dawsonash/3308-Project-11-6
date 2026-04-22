@@ -29,16 +29,18 @@
     - You must have the current version of Docker Compose installed
 
 # How to run CUFF locally:
-    1. In your terminal navigate to "3308-Project-11-6/ProjectSourceCode" by typing "cd ProjectSourceCode"
-    2. Ensure that you have Docker Compose open and then type "docker-compose up" into your terminal
-    3. Install dependencies by typing "npm install"
-    3. Open your web browser and navigate to "http://localhost:3000/"
+    1. In your terminal navigate to the repo by typing "cd 3308-Project-11-6"
+    2. Then navigate to the source code by typing "cd ProjectSourceCode"
+    3. Ensure that you have Docker Compose open and then type "docker-compose up"
+    4. Install dependencies by typing "npm install"
+    5. Open your web browser and navigate to "http://localhost:3000/"
 
 # How to run our tests:
-    1. Open your terminal and navigate to "3308-Project-11-6/ProjectSourceCode" by typing "cd ProjectSourceCode"
-    2. Ensure docker is up by typing "docker-compose up" into your terminal
-    3. Ensure dependencies are installed by typing "npm install"
-    4. Run the tests by typing "npm test"
+    1. In your terminal navigate to the repo by typing "cd 3308-Project-11-6"
+    2. Then navigate to the source code by typing "cd ProjectSourceCode"
+    3. Ensure docker is up by typing "docker-compose up" into your terminal
+    4. Ensure dependencies are installed by typing "npm install"
+    5. Run the tests by typing "npm test"
     
 # Link to CUFF: 
     https://function-finder.onrender.com/home
